@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Brasil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=Poppins:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg:#0e0f14; --s1:#14161f; --s2:#1a1d2a; --s3:#222638;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+  --green:#3dffa0; --green-dim:rgba(61,255,160,0.12);
+  --purple:#9b7fff; --purple-dim:rgba(155,127,255,0.12);
+  --amber:#ffb547; --amber-dim:rgba(255,181,71,0.1);
+  --red:#ff5f7e; --text:#e4e6f0; --muted:#6b708a; --muted2:#9296ae;
+  --r:10px; --r-sm:6px;
+  --ff-display:'Syne',sans-serif; --ff-body:'Inter',sans-serif;
+}
+
+html,body { height:100%; background:var(--bg); color:var(--text); font-family:var(--ff-body); font-size:14px; line-height:1.6; overflow:hidden; }
+
+/* ── LAYOUT ── */
+.shell { display:grid; grid-template-columns:240px 1fr; grid-template-rows:52px 1fr; height:100vh; }
+
+/* ── TOPBAR ── */
+.topbar { grid-column:1/-1; background:var(--s1); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:14px; padding:0 20px; }
+.topbar-mark { font-family:var(--ff-display); font-size:16px; font-weight:800; color:var(--green); letter-spacing:-0.5px; display:flex; align-items:center; gap:6px; }
+.topbar-mark span { color:var(--muted2); font-weight:400; font-size:12px; margin-left:2px; }
+.topbar-place { margin-left:auto; font-size:12px; color:var(--muted); padding:4px 10px; background:var(--s2); border-radius:20px; border:1px solid var(--border); }
+.topbar-status { font-size:11px; color:var(--muted); display:flex; align-items:center; gap:5px; }
+.dot-live { width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── SIDEBAR ── */
+.sidebar { background:var(--s1); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+.sidebar-inner { flex:1; overflow-y:auto; padding:16px 0 8px; }
+.sidebar-inner::-webkit-scrollbar { width:3px; }
+.sidebar-inner::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+.sidebar-label { font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; padding:4px 16px 6px; }
+.place-btn { display:flex; align-items:center; gap:9px; width:100%; padding:8px 16px; background:none; border:none; color:var(--muted2); font-family:var(--ff-body); font-size:13px; cursor:pointer; transition:all 0.15s; text-align:left; border-left:2px solid transparent; }
+.place-btn:hover { color:var(--text); background:var(--s2); }
+.place-btn.active { color:var(--green); border-left-color:var(--green); background:var(--green-dim); }
+.place-icon { font-size:15px; flex-shrink:0; }
+.place-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.place-count { font-size:10px; background:var(--s3); border-radius:10px; padding:1px 6px; color:var(--muted); }
+.sidebar-footer { padding:12px 14px; border-top:1px solid var(--border); }
+.btn-new { width:100%; padding:8px; border:1px dashed var(--border2); border-radius:var(--r-sm); background:none; color:var(--muted2); font-family:var(--ff-body); font-size:12px; cursor:pointer; transition:all 0.15s; }
+.btn-new:hover { border-color:var(--green); color:var(--green); }
+
+/* ── MAIN ── */
+.main { overflow-y:auto; padding:28px 32px; background:var(--bg); }
+.main::-webkit-scrollbar { width:4px; }
+.main::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+
+/* ── PAGE HEADER ── */
+.page-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; }
+.page-title { font-family:var(--ff-display); font-size:24px; font-weight:700; line-height:1.2; }
+.page-sub { font-size:13px; color:var(--muted); margin-top:3px; }
+
+/* ── WORKFLOW STEPS ── */
+.steps-bar { display:flex; margin-bottom:28px; background:var(--s1); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; }
+.step-tab { flex:1; padding:12px 8px; text-align:center; cursor:pointer; border:none; background:none; font-family:var(--ff-body); font-size:12px; color:var(--muted); transition:all 0.2s; border-right:1px solid var(--border); display:flex; flex-direction:column; align-items:center; gap:3px; }
+.step-tab:last-child { border-right:none; }
+.step-tab:hover { background:var(--s2); color:var(--text); }
+.step-tab.active { background:var(--green-dim); color:var(--green); }
+.step-tab.done { color:var(--green); opacity:0.6; }
+.step-num { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+.step-icon { font-size:18px; }
+
+/* ── PANELS ── */
+.panel { display:none; }
+.panel.active { display:block; }
+
+/* ── CARDS ── */
+.card { background:var(--s1); border:1px solid var(--border); border-radius:var(--r); padding:20px; margin-bottom:16px; }
+.card-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:12px; flex-wrap:wrap; }
+.card-title { font-family:var(--ff-display); font-weight:600; font-size:13px; color:var(--muted2); text-transform:uppercase; letter-spacing:0.5px; }
+
+/* ── FORM ── */
+.fgrid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.fgroup { display:flex; flex-direction:column; gap:5px; }
+.fgroup.full { grid-column:1/-1; }
+label { font-size:11px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:0.4px; }
+input[type=text],input[type=url],input[type=password],textarea,select {
+  background:var(--bg); border:1px solid var(--border2); border-radius:var(--r-sm);
+  color:var(--text); font-family:var(--ff-body); font-size:13px; padding:9px 11px;
+  transition:border 0.15s; outline:none; width:100%;
+}
+input:focus,textarea:focus,select:focus { border-color:var(--purple); }
+textarea { resize:vertical; min-height:72px; }
+select option { background:var(--s2); }
+
+/* ── BUTTONS ── */
+.btn { padding:9px 18px; border-radius:var(--r-sm); font-size:13px; font-family:var(--ff-body); cursor:pointer; border:1px solid transparent; font-weight:500; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; }
+.btn-green { background:var(--green); color:#0e0f14; border-color:var(--green); }
+.btn-green:hover { opacity:0.85; }
+.btn-purple { background:var(--purple); color:#0e0f14; border-color:var(--purple); }
+.btn-purple:hover { opacity:0.85; }
+.btn-ghost { background:transparent; color:var(--muted2); border-color:var(--border2); }
+.btn-ghost:hover { border-color:var(--purple); color:var(--purple); }
+.btn-danger { background:transparent; color:var(--red); border-color:rgba(255,95,126,0.35); }
+.btn-danger:hover { background:rgba(255,95,126,0.08); }
+.btn-sm { padding:5px 12px; font-size:12px; }
+.btn-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+/* ── NOTICES ── */
+.notice { background:var(--amber-dim); border:1px solid rgba(255,181,71,0.25); border-radius:var(--r); padding:14px 16px; margin-bottom:16px; display:flex; gap:12px; align-items:flex-start; }
+.notice .icon { font-size:20px; flex-shrink:0; margin-top:1px; }
+.notice p { font-size:12px; color:var(--amber); line-height:1.6; }
+.notice strong { font-weight:600; display:block; margin-bottom:2px; }
+.notice.info { background:var(--purple-dim); border-color:rgba(155,127,255,0.3); }
+.notice.info p { color:var(--purple); }
+
+/* ── UPLOAD ── */
+.upload-zone { border:1px dashed var(--border2); border-radius:var(--r); padding:28px 20px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative; background:var(--bg); }
+.upload-zone:hover { border-color:var(--purple); background:var(--purple-dim); }
+.upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.upload-zone-icon { font-size:28px; margin-bottom:6px; }
+.upload-zone p { font-size:13px; color:var(--muted2); }
+.upload-zone small { font-size:11px; color:var(--muted); }
+
+/* ── PHOTO GRID ── */
+.photos-wrap { margin-top:14px; }
+.photos-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
+.photo-card { position:relative; border-radius:var(--r-sm); overflow:hidden; aspect-ratio:1; border:2px solid transparent; transition:border 0.15s; background:var(--s3); }
+.photo-card img { width:100%; height:100%; object-fit:cover; display:block; }
+.photo-card.enhanced { border-color:var(--green); }
+.photo-card .overlay { position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.15s; flex-direction:column; gap:5px; padding:6px; }
+.photo-card:hover .overlay { opacity:1; }
+.badge-hi { position:absolute; top:5px; left:5px; z-index:2; font-size:9px; font-weight:700; letter-spacing:0.5px; background:var(--green); color:#0e0f14; padding:1px 6px; border-radius:10px; }
+.overlay-rm { font-size:10px; color:rgba(255,255,255,0.85); background:rgba(0,0,0,0.5); padding:3px 8px; border-radius:4px; border:1px solid rgba(255,255,255,0.2); cursor:pointer; font-family:var(--ff-body); }
+.overlay-rm:hover { background:rgba(255,95,126,0.3); }
+
+/* ── LOGO PREVIEW ── */
+.logo-preview-wrap { display:flex; align-items:center; gap:14px; margin-top:10px; }
+.logo-preview { max-height:70px; max-width:160px; object-fit:contain; border-radius:var(--r-sm); background:var(--s3); padding:8px; }
+
+/* ── WATERMARK ── */
+.wm-controls { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:12px; }
+.wm-preview-area { margin-top:14px; position:relative; background:var(--s3); border-radius:var(--r); overflow:hidden; min-height:200px; display:flex; align-items:center; justify-content:center; }
+#wm-canvas { display:block; max-width:100%; border-radius:var(--r); }
+.wm-photo-select { display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:6px; margin-top:10px; }
+.wm-thumb { border-radius:var(--r-sm); overflow:hidden; aspect-ratio:1; cursor:pointer; border:2px solid transparent; transition:border 0.15s; }
+.wm-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.wm-thumb.wm-sel { border-color:var(--green); }
+
+/* ── CHIPS / PILLS ── */
+.chips { display:flex; gap:6px; flex-wrap:wrap; }
+.chip { padding:6px 13px; border-radius:20px; border:1px solid var(--border2); background:none; color:var(--muted2); font-size:12px; cursor:pointer; font-family:var(--ff-body); transition:all 0.15s; }
+.chip:hover { border-color:var(--purple); color:var(--purple); }
+.chip.active { border-color:var(--purple); color:var(--purple); background:var(--purple-dim); }
+.lang-pills { display:flex; gap:5px; }
+.lang-pill { padding:5px 11px; border-radius:20px; border:1px solid var(--border2); background:none; font-size:12px; color:var(--muted2); cursor:pointer; font-family:var(--ff-body); transition:all 0.15s; }
+.lang-pill.active { border-color:var(--green); color:var(--green); background:var(--green-dim); }
+
+/* ── STYLE REFS ── */
+.refs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-top:12px; }
+.ref-card { background:var(--s2); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; position:relative; }
+.ref-card img { width:100%; aspect-ratio:4/5; object-fit:cover; display:block; background:var(--s3); }
+.ref-card .ref-body { padding:8px 10px; }
+.ref-card .ref-name { font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ref-rm { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:4px; font-size:11px; padding:2px 7px; cursor:pointer; }
+.palette { display:flex; gap:4px; margin-top:6px; }
+.swatch { width:18px; height:18px; border-radius:4px; border:1px solid rgba(255,255,255,0.15); }
+.analysis-box { background:var(--bg); border:1px solid var(--border2); border-radius:var(--r-sm); padding:12px; margin-top:10px; font-size:12px; color:var(--muted2); line-height:1.7; }
+.analysis-box b { color:var(--text); font-weight:600; }
+
+/* ── OUTPUT ── */
+.output-wrap { margin-top:14px; }
+.output-block { background:var(--bg); border:1px solid var(--border2); border-radius:var(--r); padding:16px; margin-bottom:12px; }
+.output-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+.output-text { font-size:13px; line-height:1.75; color:var(--text); white-space:pre-wrap; outline:none; min-height:60px; }
+.output-text[contenteditable=true]:focus { background:rgba(155,127,255,0.04); border-radius:4px; }
+
+/* ── LOADING / PROGRESS ── */
+.loader { display:inline-flex; gap:4px; align-items:center; }
+.loader span { width:5px; height:5px; border-radius:50%; background:var(--green); animation:ldot 1s infinite; }
+.loader span:nth-child(2){animation-delay:.15s} .loader span:nth-child(3){animation-delay:.3s}
+@keyframes ldot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.progress { height:6px; background:var(--s3); border-radius:6px; overflow:hidden; margin-top:10px; }
+.progress > div { height:100%; width:0%; background:var(--green); transition:width 0.2s; }
+
+/* ── RESULT PHOTOS ── */
+.result-photos-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-top:14px; }
+.result-photo-card { background:var(--s2); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; }
+.result-photo-card img { width:100%; display:block; }
+.result-photo-footer { padding:8px 10px; display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.result-photo-name { font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:22px; right:22px; z-index:999; background:var(--s2); border:1px solid var(--green); color:var(--green); padding:10px 18px; border-radius:var(--r); font-size:13px; transform:translateY(16px); opacity:0; transition:all 0.3s; pointer-events:none; max-width:360px; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast.error { border-color:var(--red); color:var(--red); }
+
+/* ── MODAL ── */
+.modal-back { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:900; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-back.open { display:flex; }
+.modal { background:var(--s1); border:1px solid var(--border2); border-radius:var(--r); width:100%; max-width:520px; max-height:90vh; overflow-y:auto; }
+.modal-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--s1); }
+.modal-title { font-family:var(--ff-display); font-weight:700; font-size:16px; }
+.modal-body { padding:20px; }
+.modal-x { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; line-height:1; }
+
+/* ── EMPTY ── */
+.empty { text-align:center; padding:80px 20px; }
+.empty h2 { font-family:var(--ff-display); font-size:26px; font-weight:700; margin-bottom:8px; }
+.empty p { color:var(--muted); font-size:13px; margin-bottom:24px; max-width:360px; margin-inline:auto; }
+
+/* ── BADGES ── */
+.badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:20px; font-size:11px; border:1px solid var(--border); background:var(--s2); color:var(--muted); cursor:pointer; }
+.badge.ok { border-color:rgba(61,255,160,0.3); color:var(--green); background:var(--green-dim); }
+.badge.err { border-color:rgba(255,95,126,0.3); color:var(--red); }
+.badge-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+
+hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
+input[type=range] { width:100%; accent-color:var(--purple); }
+.pill-hint { font-size:11px; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-mark">✦ Studio Brasil <span>/ contenido para voluntariado</span></div>
+  <div class="topbar-status">
+    <div class="dot-live" id="ai-dot" style="background:var(--muted);box-shadow:none"></div>
+    <span id="ai-label">IA sin configurar</span>
+  </div>
+  <button class="badge" onclick="openSettings()" style="margin-left:10px">⚙ Ajustes</button>
+  <div class="topbar-place" id="topbar-place" style="display:none"></div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-inner">
+    <div class="sidebar-label">Lugares</div>
+    <div id="places-list"></div>
+  </div>
+  <div class="sidebar-footer">
+    <button class="btn-new" onclick="newPlace()">+ Agregar lugar</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+
+  <div id="view-empty" class="empty">
+    <div style="font-size:52px;margin-bottom:16px">🌿</div>
+    <h2>Bienvenida al studio</h2>
+    <p>Creá tu primer lugar para empezar a gestionar su contenido. Todo se guarda en tu navegador (IndexedDB) y podés abrirlo desde cualquier dispositivo con el link.</p>
+    <button class="btn btn-green" onclick="newPlace()">Crear primer lugar</button>
+  </div>
+
+  <div id="view-place" style="display:none">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="place-title">—</div>
+        <div class="page-sub" id="place-sub">—</div>
+      </div>
+      <div class="btn-row">
+        <div class="badge" id="ai-badge" onclick="openSettings()">
+          <div class="badge-dot"></div>
+          <span id="ai-badge-text">Configurá la IA</span>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deletePlace()">Eliminar</button>
+      </div>
+    </div>
+
+    <div class="steps-bar">
+      <button class="step-tab active" id="stab-0" onclick="goStep(0)"><span class="step-icon">📋</span><span class="step-num">Perfil</span></button>
+      <button class="step-tab" id="stab-1" onclick="goStep(1)"><span class="step-icon">🖼</span><span class="step-num">Fotos + IA</span></button>
+      <button class="step-tab" id="stab-2" onclick="goStep(2)"><span class="step-icon">💧</span><span class="step-num">Marca de agua</span></button>
+      <button class="step-tab" id="stab-3" onclick="goStep(3)"><span class="step-icon">🎨</span><span class="step-num">Referencias IG</span></button>
+      <button class="step-tab" id="stab-4" onclick="goStep(4)"><span class="step-icon">✦</span><span class="step-num">Generar contenido</span></button>
+      <button class="step-tab" id="stab-5" onclick="goStep(5)"><span class="step-icon">📦</span><span class="step-num">Exportar</span></button>
+    </div>
+
+    <!-- ═══ PANEL 0: PERFIL ═══ -->
+    <div class="panel active" id="panel-0">
+      <div class="card">
+        <div class="card-head"><div class="card-title">Datos del lugar</div></div>
+        <div class="fgrid">
+          <div class="fgroup"><label>Nombre</label><input type="text" id="f-name" placeholder="Casa do Sol" oninput="schedSave()"></div>
+          <div class="fgroup"><label>Ciudad / Estado</label><input type="text" id="f-city" placeholder="Florianópolis, SC" oninput="schedSave()"></div>
+          <div class="fgroup"><label>Tipo de organización</label><input type="text" id="f-type" placeholder="ONG, hostel comunitario…" oninput="schedSave()"></div>
+          <div class="fgroup"><label>Instagram</label><input type="text" id="f-ig" placeholder="@casadosol" oninput="schedSave()"></div>
+          <div class="fgroup"><label>Website</label><input type="url" id="f-web" placeholder="https://…" oninput="schedSave()"></div>
+          <div class="fgroup"><label>Colores de marca</label><input type="text" id="f-colors" placeholder="verde, blanco, terracota" oninput="schedSave()"></div>
+          <div class="fgroup full"><label>Misión — ¿qué hacen?</label>
+            <textarea id="f-mission" placeholder="Ofrecemos educación gratuita a niños en situación vulnerable…" oninput="schedSave()"></textarea>
+          </div>
+          <div class="fgroup full"><label>Tono de comunicación</label>
+            <textarea id="f-tone" placeholder="Cercano, cálido, inspirador. En portugués informal. Usan emojis con moderación." oninput="schedSave()"></textarea>
+          </div>
+          <div class="fgroup full"><label>Palabras clave / hashtags habituales</label>
+            <input type="text" id="f-tags" placeholder="#voluntariado #brasil #comunidade" oninput="schedSave()">
+          </div>
+        </div>
+        <hr class="div">
+        <div class="btn-row">
+          <button class="btn btn-green" onclick="savePlace();goStep(1)">Guardar y continuar →</button>
+          <span id="save-status" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PANEL 1: FOTOS + IA ═══ -->
+    <div class="panel" id="panel-1">
+
+      <div class="notice info">
+        <div class="icon">🤖</div>
+        <div><p><strong>Mejora por IA en el navegador</strong>
+        Subí tus fotos en baja calidad y la app las reescala con una red neuronal (ESRGAN) directamente en tu navegador. La primera vez descarga el modelo (~1&nbsp;MB) y tarda un poco más. La IA de mejora corre en el dispositivo, no gasta datos ni RAM del servidor.</p></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">Logo del lugar</div></div>
+        <div class="upload-zone" id="logo-zone">
+          <input type="file" accept="image/*" onchange="handleLogo(event)">
+          <div class="upload-zone-icon">🏷</div>
+          <p>Subí el logo</p>
+          <small>PNG con fondo transparente recomendado</small>
+        </div>
+        <div id="logo-preview-wrap" style="display:none" class="logo-preview-wrap">
+          <img id="logo-img" class="logo-preview" src="" alt="logo">
+          <button class="btn btn-ghost btn-sm" onclick="removeLogo()">Quitar logo</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Fotos del lugar</div>
+          <span id="photo-count" style="font-size:12px;color:var(--muted)">0 fotos</span>
+        </div>
+        <div class="upload-zone">
+          <input type="file" accept="image/*" multiple onchange="handlePhotos(event)">
+          <div class="upload-zone-icon">📸</div>
+          <p>Subí una o varias fotos</p>
+          <small>JPG, PNG — podés seleccionar múltiples</small>
+        </div>
+
+        <div id="photo-toolbar" style="display:none;margin-top:16px">
+          <div class="btn-row">
+            <div class="fgroup" style="flex-direction:row;align-items:center;gap:8px">
+              <label style="white-space:nowrap">Escala</label>
+              <select id="up-scale" style="width:auto"><option value="2">×2</option><option value="4">×4</option></select>
+            </div>
+            <button class="btn btn-purple" id="btn-upscale-all" onclick="upscaleAll()">✦ Mejorar todas con IA</button>
+            <span class="pill-hint" id="upscale-status"></span>
+          </div>
+          <div class="progress" id="up-progress-wrap" style="display:none"><div id="up-progress"></div></div>
+        </div>
+
+        <div class="photos-wrap"><div class="photos-grid" id="photos-grid"></div></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="goStep(2)">Continuar →</button>
+        <button class="btn btn-ghost btn-sm" onclick="goStep(0)">← Volver</button>
+      </div>
+    </div>
+
+    <!-- ═══ PANEL 2: MARCA DE AGUA ═══ -->
+    <div class="panel" id="panel-2">
+      <div class="card">
+        <div class="card-head"><div class="card-title">Elegí una foto para previsualizar</div></div>
+        <div class="wm-photo-select" id="wm-photo-select"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Configuración de marca de agua</div></div>
+        <div class="wm-controls">
+          <div class="fgroup"><label>Posición</label>
+            <select id="wm-pos" onchange="renderWatermark()">
+              <option value="br">Abajo derecha</option><option value="bl">Abajo izquierda</option>
+              <option value="tr">Arriba derecha</option><option value="tl">Arriba izquierda</option>
+              <option value="center">Centro</option>
+            </select>
+          </div>
+          <div class="fgroup"><label>Tamaño del logo</label><input type="range" id="wm-size" min="5" max="40" value="20" oninput="renderWatermark()"></div>
+          <div class="fgroup"><label>Opacidad</label><input type="range" id="wm-opacity" min="10" max="100" value="80" oninput="renderWatermark()"></div>
+          <div class="fgroup"><label>Margen (px)</label><input type="range" id="wm-margin" min="0" max="60" value="20" oninput="renderWatermark()"></div>
+          <div class="fgroup"><label>¿Aplicar a todas?</label>
+            <select id="wm-all"><option value="1">Sí, todas las fotos</option><option value="0">Solo la seleccionada</option></select>
+          </div>
+        </div>
+        <hr class="div">
+        <div class="card-title" style="margin-bottom:10px">Previsualización</div>
+        <div class="wm-preview-area">
+          <canvas id="wm-canvas"></canvas>
+          <div id="wm-empty" style="color:var(--muted);font-size:13px">Seleccioná una foto y cargá el logo para previsualizar</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="applyWatermarks();goStep(3)">Aplicar y continuar →</button>
+        <button class="btn btn-ghost btn-sm" onclick="goStep(1)">← Volver</button>
+      </div>
+    </div>
+
+    <!-- ═══ PANEL 3: REFERENCIAS IG ═══ -->
+    <div class="panel" id="panel-3">
+      <div class="notice info">
+        <div class="icon">🎨</div>
+        <div><p><strong>Copiá el estilo de tu Instagram</strong>
+        Subí capturas del feed (posts, stories, biografía). La IA las analiza y extrae paleta de colores, tipografías aproximadas, layout y tono. Después usa esa referencia para generar contenido y plantillas que respeten tu estilo.</p></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Capturas de referencia (feed / stories)</div>
+          <span id="ref-count" style="font-size:12px;color:var(--muted)">0 capturas</span>
+        </div>
+        <div class="upload-zone">
+          <input type="file" accept="image/*" multiple onchange="handleRefs(event)">
+          <div class="upload-zone-icon">📲</div>
+          <p>Subí capturas de Instagram</p>
+          <small>Capturá el feed, un post o tus stories actuales</small>
+        </div>
+        <div class="refs-grid" id="refs-grid"></div>
+        <div class="btn-row" style="margin-top:16px">
+          <button class="btn btn-purple" id="btn-analyze" onclick="analyzeRefs()">✦ Analizar estilo con IA</button>
+          <span class="pill-hint" id="analyze-status"></span>
+        </div>
+        <div class="progress" id="ref-progress-wrap" style="display:none"><div id="ref-progress"></div></div>
+      </div>
+
+      <div class="card" id="style-summary-card" style="display:none">
+        <div class="card-head"><div class="card-title">Estilo detectado</div></div>
+        <div id="style-summary"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="goStep(4)">Continuar →</button>
+        <button class="btn btn-ghost btn-sm" onclick="goStep(2)">← Volver</button>
+      </div>
+    </div>
+
+    <!-- ═══ PANEL 4: CONTENIDO ═══ -->
+    <div class="panel" id="panel-4">
+      <div class="card">
+        <div class="card-head"><div class="card-title">Tipo de contenido</div></div>
+        <div class="chips" id="content-chips">
+          <button class="chip active" data-type="caption_ig" onclick="selChip(this)">📱 Caption IG</button>
+          <button class="chip" data-type="stories" onclick="selChip(this)">⚡ Ideas de stories</button>
+          <button class="chip" data-type="bio" onclick="selChip(this)">👤 Bio de perfil</button>
+          <button class="chip" data-type="web_about" onclick="selChip(this)">🌐 Sobre nosotros</button>
+          <button class="chip" data-type="web_mission" onclick="selChip(this)">💚 Misión & valores</button>
+          <button class="chip" data-type="volunteer" onclick="selChip(this)">🙋 Llamado a voluntarios</button>
+        </div>
+        <hr class="div">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div class="card-title">Idioma</div>
+          <div class="lang-pills">
+            <button class="lang-pill active" data-lang="pt" onclick="selLang(this)">🇧🇷 Portugués</button>
+            <button class="lang-pill" data-lang="es" onclick="selLang(this)">🇦🇷 Español</button>
+            <button class="lang-pill" data-lang="en" onclick="selLang(this)">🇺🇸 English</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">Contexto extra (opcional)</div></div>
+        <textarea id="extra-ctx" placeholder="Ej: Esta foto es del taller de arte del martes. Los chicos hicieron pinturas con materiales reciclados…" style="min-height:55px"></textarea>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:16px">
+        <button class="btn btn-purple" id="btn-gen" onclick="generateContent()">✦ Generar con IA</button>
+        <span id="gen-status" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+
+      <div id="output-area"></div>
+
+      <div class="btn-row" style="margin-top:8px">
+        <button class="btn btn-ghost btn-sm" onclick="goStep(3)">← Volver</button>
+        <button class="btn btn-green" id="btn-to-export" onclick="goStep(5)" style="display:none">Ver exportación →</button>
+      </div>
+    </div>
+
+    <!-- ═══ PANEL 5: EXPORTAR ═══ -->
+    <div class="panel" id="panel-5">
+      <div class="card">
+        <div class="card-head"><div class="card-title">Fotos con marca de agua</div></div>
+        <div id="export-photos-grid" class="result-photos-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">Plantilla de post (1080×1080)</div></div>
+        <div class="fmix" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+          <div class="fgroup"><label>Formato</label>
+            <select id="tpl-format"><option value="square">Cuadrado 1080×1080</option><option value="story">Story 1080×1920</option><option value="feed45">Feed 1080×1350</option></select>
+          </div>
+          <div class="fgroup"><label>Tipografía</label>
+            <select id="tpl-font">
+              <option value="Poppins">Poppins (moderna)</option>
+              <option value="Syne">Syne (disruptiva)</option>
+              <option value="Playfair Display">Playfair (elegante)</option>
+              <option value="Bebas Neue">Bebas Neue (impacto)</option>
+              <option value="Inter">Inter (neutra)</option>
+            </select>
+          </div>
+          <div class="fgroup"><label>Titular</label><input type="text" id="tpl-title" placeholder="Se autocompleta…"></div>
+          <button class="btn btn-purple" onclick="makeTemplate()">✦ Generar plantilla</button>
+        </div>
+        <div id="template-grid" class="result-photos-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Contenido generado</div>
+          <button class="btn btn-ghost btn-sm" onclick="copyAllText()">Copiar todo</button>
+        </div>
+        <div id="export-text-area" style="font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;padding:4px 0"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="downloadAll()">⬇ Descargar todo (ZIP)</button>
+        <button class="btn btn-ghost btn-sm" onclick="goStep(4)">← Volver a editar</button>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:10px">El ZIP incluye fotos con marca de agua + plantillas + un .txt con el contenido.</p>
+    </div>
+
+  </div><!-- /view-place -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══ SETTINGS MODAL ═══ -->
+<div class="modal-back" id="settings-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">⚙ Ajustes de IA</div>
+      <button class="modal-x" onclick="closeSettings()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="fgroup full" style="margin-bottom:14px">
+        <label>Motor de IA</label>
+        <select id="s-backend" onchange="backendChanged()">
+          <option value="gemini">Google Gemini (nube) — no usa tu PC</option>
+          <option value="lmstudio">LM Studio (local) — usa tu RAM</option>
+        </select>
+      </div>
+
+      <div id="s-gemini-block">
+        <div class="notice info" style="margin-bottom:14px">
+          <div class="icon">🔑</div>
+          <div><p><strong>API key de Gemini</strong>
+          Sacala gratis en <b>aistudio.google.com/apikey</b> → "Create API key". Pegala acá. Se guarda solo en este navegador; nunca sale de tu equipo salvo hacia Google.</p></div>
+        </div>
+        <div class="fgroup full" style="margin-bottom:12px">
+          <label>API key</label>
+          <input type="password" id="s-gemini-key" placeholder="AIza…">
+        </div>
+        <div class="btn-row" style="margin-bottom:12px">
+          <button class="btn btn-ghost btn-sm" onclick="loadGeminiModels()">Cargar modelos disponibles</button>
+          <span class="pill-hint" id="s-models-status"></span>
+        </div>
+        <div class="fgroup full">
+          <label>Modelo</label>
+          <select id="s-gemini-model"></select>
+        </div>
+      </div>
+
+      <div id="s-lm-block" style="display:none">
+        <div class="fgroup full" style="margin-bottom:12px">
+          <label>URL del servidor local</label>
+          <input type="text" id="s-lm-url" placeholder="http://localhost:1234">
+        </div>
+        <div class="fgroup full" style="margin-bottom:12px">
+          <label>Modelo</label>
+          <input type="text" id="s-lm-model" placeholder="local-model">
+        </div>
+        <div class="notice"><div class="icon">⚠</div><div><p>Para vision (analizar capturas) LM Studio necesita un modelo multimodal (ej. Qwen2-VL, LLaVA). Y el servidor debe tener CORS activado.</p></div></div>
+      </div>
+
+      <hr class="div">
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="saveSettings()">Guardar ajustes</button>
+        <button class="btn btn-ghost btn-sm" onclick="testAI()">Probar conexión</button>
+        <span class="pill-hint" id="s-test-status"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LIBS ═══ -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@1.0.0/dist/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/upscaler@1.0.0/dist/browser/umd/upscaler.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@upscalerjs/esrgan-slim@1.0.0/dist/umd/models/esrgan-slim/src/x4/index.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════
+// STORAGE — IndexedDB (persiste de verdad en cualquier navegador)
+// ═══════════════════════════════════════════
+const IDB = {
+  db: null,
+  open() {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('studio-brasil', 1);
+      r.onupgradeneeded = e => {
+        const d = e.target.result;
+        if (!d.objectStoreNames.contains('places')) d.createObjectStore('places', { keyPath: 'id' });
+      };
+      r.onsuccess = e => { this.db = e.target.result; res(this.db); };
+      r.onerror = e => rej(e.target.error);
+    });
+  },
+  async all()  { const db = await this.open(); return new Promise((res, rej) => { const q = db.transaction('places','readonly').objectStore('places').getAll(); q.onsuccess = () => res(q.result||[]); q.onerror = () => rej(q.error); }); },
+  async put(p) { const db = await this.open(); return new Promise((res, rej) => { const q = db.transaction('places','readwrite').objectStore('places').put(p); q.onsuccess = () => res(); q.onerror = () => rej(q.error); }); },
+  async del(id){ const db = await this.open(); return new Promise((res, rej) => { const q = db.transaction('places','readwrite').objectStore('places').delete(id); q.onsuccess = () => res(); q.onerror = () => rej(q.error); }); }
+};
+
+// ═══════════════════════════════════════════
+// SETTINGS (localStorage)
+// ═══════════════════════════════════════════
+const DEFAULT_SETTINGS = { backend:'gemini', geminiKey:'', geminiModel:'gemini-2.5-flash', lmUrl:'http://localhost:1234', lmModel:'local-model' };
+let settings = { ...DEFAULT_SETTINGS };
+
+function loadSettings() {
+  try { Object.assign(settings, JSON.parse(localStorage.getItem('sb_settings')||'{}')); } catch {}
+}
+function persistSettings() { localStorage.setItem('sb_settings', JSON.stringify(settings)); }
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let places = [];
+let cur = null;
+let curStep = 0;
+let wmPhotoIdx = null;
+let contentType = 'caption_ig';
+let lang = 'pt';
+let generatedText = '';
+let watermarkedPhotos = [];   // [{name, dataUrl, source:'wm'}]
+let templatePosts = [];       // [{name, dataUrl}]
+let curStyle = null;          // analysis of the first ref
+let logoImg = new Image();
+let logoLoaded = false;
+let upscalers = {};           // cache {2: Upscaler, 4: Upscaler}
+let tfReady = false;
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+async function init() {
+  loadSettings();
+  try {
+    places = await IDB.all();
+  } catch (e) { console.error(e); toast('No se pudo abrir el almacenamiento', true); }
+  renderSidebar();
+  refreshAIStatus();
+  if (places.length) selectPlace(places[0].id);
+  detectUpscaler();
+}
+
+// ═══════════════════════════════════════════
+// AI STATUS
+// ═══════════════════════════════════════════
+function refreshAIStatus() {
+  const dot = document.getElementById('ai-dot');
+  const lbl = document.getElementById('ai-label');
+  const badge = document.getElementById('ai-badge');
+  const badgeTxt = document.getElementById('ai-badge-text');
+  let ok = false, text = '';
+  if (settings.backend === 'gemini') {
+    ok = !!settings.geminiKey;
+    text = ok ? ('Gemini · ' + settings.geminiModel) : 'Gemini — falta API key';
+  } else {
+    ok = true; // local no se puede verificar sin fetch
+    text = 'LM Studio · ' + settings.lmModel;
+  }
+  if (dot) { dot.style.background = ok ? 'var(--green)' : 'var(--red)'; dot.style.boxShadow = ok ? '0 0 6px var(--green)' : 'none'; }
+  if (lbl) lbl.textContent = ok ? ('IA: ' + text) : ('IA: ' + text);
+  if (badge) badge.className = 'badge ' + (ok ? 'ok' : 'err');
+  if (badgeTxt) badgeTxt.textContent = ok ? text : 'Configurá la IA';
+}
+
+// ═══════════════════════════════════════════
+// SETTINGS UI
+// ═══════════════════════════════════════════
+function openSettings() {
+  document.getElementById('s-backend').value = settings.backend;
+  document.getElementById('s-gemini-key').value = settings.geminiKey;
+  document.getElementById('s-gemini-model').innerHTML = '<option>'+(settings.geminiModel||'gemini-2.5-flash')+'</option>';
+  document.getElementById('s-lm-url').value = settings.lmUrl;
+  document.getElementById('s-lm-model').value = settings.lmModel;
+  backendChanged();
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+function backendChanged() {
+  const b = document.getElementById('s-backend').value;
+  document.getElementById('s-gemini-block').style.display = b === 'gemini' ? '' : 'none';
+  document.getElementById('s-lm-block').style.display = b === 'lmstudio' ? '' : 'none';
+}
+function saveSettings() {
+  settings.backend = document.getElementById('s-backend').value;
+  settings.geminiKey = document.getElementById('s-gemini-key').value.trim();
+  settings.geminiModel = document.getElementById('s-gemini-model').value.trim() || 'gemini-2.5-flash';
+  settings.lmUrl = document.getElementById('s-lm-url').value.trim() || 'http://localhost:1234';
+  settings.lmModel = document.getElementById('s-lm-model').value.trim() || 'local-model';
+  persistSettings();
+  refreshAIStatus();
+  closeSettings();
+  toast('Ajustes guardados');
+}
+
+async function loadGeminiModels() {
+  const key = document.getElementById('s-gemini-key').value.trim();
+  const st = document.getElementById('s-models-status');
+  if (!key) { st.textContent = 'Pegá la API key primero'; return; }
+  st.textContent = 'Cargando…';
+  try {
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(key));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const models = (d.models || [])
+      .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+      .map(m => m.name.replace(/^models\//, ''));
+    if (!models.length) throw new Error('sin modelos');
+    const sel = document.getElementById('s-gemini-model');
+    const current = sel.value;
+    sel.innerHTML = models.map(m => `<option>${m}</option>`).join('');
+    if (models.includes(current)) sel.value = current;
+    else sel.value = models.find(m => m.includes('flash')) || models[0];
+    st.textContent = models.length + ' modelos';
+  } catch (e) { st.textContent = 'Error: ' + e.message; }
+}
+
+async function testAI() {
+  const st = document.getElementById('s-test-status');
+  st.textContent = 'Probando…';
+  try {
+    if (document.getElementById('s-backend').value === 'gemini') {
+      const key = document.getElementById('s-gemini-key').value.trim();
+      const model = document.getElementById('s-gemini-model').value.trim() || 'gemini-2.5-flash';
+      if (!key) throw new Error('falta API key');
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Responde solo: ok' }] }], generationConfig: { maxOutputTokens: 10 } })
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      st.textContent = '✓ Gemini responde';
+    } else {
+      const url = document.getElementById('s-lm-url').value.trim() || 'http://localhost:1234';
+      const r = await fetch(url.replace(/\/$/, '') + '/v1/models', { signal: AbortSignal.timeout(4000) });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      st.textContent = '✓ LM Studio responde';
+    }
+  } catch (e) { st.textContent = '✗ ' + e.message; }
+}
+
+// ═══════════════════════════════════════════
+// SIDEBAR / PLACES
+// ═══════════════════════════════════════════
+function renderSidebar() {
+  const el = document.getElementById('places-list');
+  if (!places.length) { el.innerHTML = '<div style="padding:6px 16px;font-size:12px;color:var(--muted)">Ningún lugar aún</div>'; return; }
+  el.innerHTML = places.map(p => `
+    <button class="place-btn ${cur && cur.id === p.id ? 'active' : ''}" onclick="selectPlace('${p.id}')">
+      <span class="place-icon">🌿</span>
+      <span class="place-name">${escHtml(p.name || 'Sin nombre')}</span>
+      <span class="place-count">${(p.photos || []).length}</span>
+    </button>`).join('');
+}
+
+function uid() { return 'p_' + Date.now() + Math.random().toString(36).slice(2, 6); }
+
+async function newPlace() {
+  const p = { id: uid(), name: 'Nuevo lugar', city: '', type: '', ig: '', website: '', colors: '', mission: '', tone: '', tags: '', logo: null, photos: [], refs: [], styleRef: null, content: null };
+  places.push(p);
+  await IDB.put(p);
+  selectPlace(p.id);
+}
+
+function selectPlace(id) {
+  cur = places.find(p => p.id === id);
+  if (!cur) return;
+  if (!cur.photos) cur.photos = [];
+  if (!cur.refs) cur.refs = [];
+  watermarkedPhotos = []; templatePosts = []; generatedText = ''; curStyle = cur.styleRef || null;
+  logoLoaded = false;
+  if (cur.logo) { logoImg.onload = () => { logoLoaded = true; if (wmPhotoIdx !== null) renderWatermark(); }; logoImg.src = cur.logo; }
+  renderSidebar();
+  renderPlaceUI();
+  goStep(0);
+  refreshAIStatus();
+}
+
+function renderPlaceUI() {
+  document.getElementById('view-empty').style.display = 'none';
+  document.getElementById('view-place').style.display = '';
+  document.getElementById('place-title').textContent = cur.name || 'Sin nombre';
+  document.getElementById('place-sub').textContent = [cur.city, cur.type].filter(Boolean).join(' · ') || 'Sin datos aún';
+  document.getElementById('topbar-place').style.display = '';
+  document.getElementById('topbar-place').textContent = cur.name || '—';
+  setVal('f-name', cur.name); setVal('f-city', cur.city); setVal('f-type', cur.type);
+  setVal('f-ig', cur.ig); setVal('f-web', cur.website); setVal('f-colors', cur.colors);
+  setVal('f-mission', cur.mission); setVal('f-tone', cur.tone); setVal('f-tags', cur.tags);
+  renderLogoPreview(); renderPhotosGrid(); renderWMPhotoSelect(); renderRefs(); renderStyleSummary();
+}
+function setVal(id, v) { const el = document.getElementById(id); if (el) el.value = v || ''; }
+function gVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+async function deletePlace() {
+  if (!cur) return;
+  if (!confirm('¿Eliminar "' + cur.name + '"? Se perderán todos sus datos.')) return;
+  await IDB.del(cur.id);
+  places = places.filter(p => p.id !== cur.id);
+  cur = null;
+  renderSidebar();
+  document.getElementById('view-empty').style.display = '';
+  document.getElementById('view-place').style.display = 'none';
+  document.getElementById('topbar-place').style.display = 'none';
+  toast('Lugar eliminado');
+}
+
+// ═══════════════════════════════════════════
+// SAVE
+// ═══════════════════════════════════════════
+let saveTimer = null;
+function schedSave() { clearTimeout(saveTimer); saveTimer = setTimeout(savePlace, 700); }
+
+async function savePlace() {
+  if (!cur) return;
+  cur.name = gVal('f-name'); cur.city = gVal('f-city'); cur.type = gVal('f-type');
+  cur.ig = gVal('f-ig'); cur.website = gVal('f-web'); cur.colors = gVal('f-colors');
+  cur.mission = gVal('f-mission'); cur.tone = gVal('f-tone'); cur.tags = gVal('f-tags');
+  await IDB.put(cur);
+  document.getElementById('place-title').textContent = cur.name || 'Sin nombre';
+  document.getElementById('place-sub').textContent = [cur.city, cur.type].filter(Boolean).join(' · ') || 'Sin datos aún';
+  document.getElementById('topbar-place').textContent = cur.name || '—';
+  renderSidebar();
+  const st = document.getElementById('save-status');
+  if (st) { st.textContent = '✓ Guardado'; setTimeout(() => { st.textContent = ''; }, 2000); }
+}
+
+// ═══════════════════════════════════════════
+// STEPS
+// ═══════════════════════════════════════════
+function goStep(n) {
+  curStep = n;
+  document.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('active', i === n));
+  document.querySelectorAll('.step-tab').forEach((t, i) => { t.classList.toggle('active', i === n); t.classList.toggle('done', i < n); });
+  if (n === 2) renderWMPhotoSelect();
+  if (n === 3) renderRefs();
+  if (n === 5) renderExport();
+}
+
+// ═══════════════════════════════════════════
+// LOGO
+// ═══════════════════════════════════════════
+function handleLogo(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const rd = new FileReader();
+  rd.onload = ev => {
+    cur.logo = ev.target.result;
+    logoImg.onload = () => { logoLoaded = true; if (wmPhotoIdx !== null) renderWatermark(); };
+    logoImg.src = cur.logo;
+    IDB.put(cur); renderLogoPreview(); renderWMPhotoSelect(); toast('Logo guardado');
+  };
+  rd.readAsDataURL(file);
+}
+function renderLogoPreview() {
+  const wrap = document.getElementById('logo-preview-wrap');
+  const img = document.getElementById('logo-img');
+  const zone = document.getElementById('logo-zone');
+  if (!wrap || !img || !zone) return;
+  if (cur.logo) { wrap.style.display = 'flex'; img.src = cur.logo; zone.style.display = 'none'; }
+  else { wrap.style.display = 'none'; zone.style.display = ''; }
+}
+function removeLogo() { cur.logo = null; logoLoaded = false; IDB.put(cur); renderLogoPreview(); toast('Logo quitado'); }
+
+// ═══════════════════════════════════════════
+// PHOTOS
+// ═══════════════════════════════════════════
+function handlePhotos(e) {
+  const files = Array.from(e.target.files); if (!files.length) return;
+  let loaded = 0;
+  files.forEach(f => {
+    const rd = new FileReader();
+    rd.onload = ev => {
+      cur.photos.push({ name: f.name, data: ev.target.result, hi: null });
+      loaded++;
+      if (loaded === files.length) {
+        IDB.put(cur); renderPhotosGrid(); renderWMPhotoSelect();
+        toast(files.length + ' foto' + (files.length > 1 ? 's' : '') + ' guardada' + (files.length > 1 ? 's' : ''));
+      }
+    };
+    rd.readAsDataURL(f);
+  });
+  e.target.value = '';
+}
+
+function effPhoto(ph) { return ph.hi || ph.data; }
+
+function renderPhotosGrid() {
+  const grid = document.getElementById('photos-grid'); if (!grid) return;
+  const photos = cur.photos || [];
+  document.getElementById('photo-toolbar').style.display = photos.length ? '' : 'none';
+  if (!photos.length) { grid.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px 0">Ninguna foto aún</div>'; updatePhotoCount(); return; }
+  grid.innerHTML = photos.map((ph, i) => `
+    <div class="photo-card ${ph.hi ? 'enhanced' : ''}">
+      ${ph.hi ? '<span class="badge-hi">IA ✓</span>' : ''}
+      <img src="${effPhoto(ph)}" alt="${escHtml(ph.name)}">
+      <div class="overlay">
+        <button class="overlay-rm" onclick="upscaleOne(${i})">✦ Mejorar IA</button>
+        ${ph.hi ? `<button class="overlay-rm" onclick="revertPhoto(${i})">♻ Ver original</button>` : ''}
+        <button class="overlay-rm" onclick="removePhoto(${i})">✕ Quitar</button>
+      </div>
+    </div>`).join('');
+  updatePhotoCount();
+}
+
+function removePhoto(i) {
+  cur.photos.splice(i, 1);
+  IDB.put(cur); renderPhotosGrid(); renderWMPhotoSelect();
+  if (wmPhotoIdx === i) { wmPhotoIdx = null; clearWMCanvas(); }
+  toast('Foto quitada');
+}
+function revertPhoto(i) {
+  cur.photos[i].hi = null;
+  IDB.put(cur); renderPhotosGrid();
+  toast('Original restaurado');
+}
+function updatePhotoCount() {
+  const el = document.getElementById('photo-count');
+  if (el) el.textContent = (cur.photos || []).length + ' foto' + ((cur.photos || []).length !== 1 ? 's' : '');
+}
+
+// ═══════════════════════════════════════════
+// IA UPSCALING (TensorFlow.js + ESRGAN en el navegador)
+// ═══════════════════════════════════════════
+function detectUpscaler() {
+  tfReady = !!(window.tf && window.Upscaler);
+  if (!tfReady) console.warn('UpscalerJS/TFJS no disponibles: se usará el reescalado básico.');
+}
+
+async function getUpscaler(scale) {
+  const s = scale === 4 ? 4 : 2;
+  if (upscalers[s]) return upscalers[s];
+  if (!window.Upscaler) throw new Error('UpscalerJS no cargó');
+  let model = null;
+  if (s === 4 && window.ESRGANSlim4x) model = window.ESRGANSlim4x;
+  if (!model && window.DefaultUpscalerJSModel) model = window.DefaultUpscalerJSModel;
+  upscalers[s] = new window.Upscaler({ model });
+  return upscalers[s];
+}
+
+async function upscaleImage(dataUrl, scale, onProgress) {
+  if (!window.Upscaler || !window.tf) return basicUpscale(dataUrl, scale);   // fallback
+  try {
+    const up = await getUpscaler(scale);
+    const out = await up.upscale(dataUrl, { output: 'base64', patchSize: 64, padding: 2, progress: onProgress || undefined });
+    return out;
+  } catch (e) {
+    console.warn('Fallo el upscaling IA, uso fallback:', e);
+    toast('La IA falló en esta foto, aplico mejora básica', true);
+    return basicUpscale(dataUrl, scale);
+  }
+}
+
+// Fallback sin IA: reescalado de alta calidad + unsharp mask
+function basicUpscale(dataUrl, scale) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth * scale, h = img.naturalHeight * scale;
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, w, h);
+      const src = ctx.getImageData(0, 0, w, h);
+      const out = new ImageData(new Uint8ClampedArray(src.data), w, h);
+      const k = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+      const d = src.data, o = out.data;
+      for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+        const i = (y * w + x) * 4;
+        for (let ch = 0; ch < 3; ch++) {
+          let sum = 0;
+          for (let ky = -1; ky <= 1; ky++) for (let kx = -1; kx <= 1; kx++) {
+            sum += d[((y + ky) * w + (x + kx)) * 4 + ch] * k[(ky + 1) * 3 + (kx + 1)];
+          }
+          o[i + ch] = Math.max(0, Math.min(255, sum));
+        }
+      }
+      ctx.putImageData(out, 0, 0);
+      res(c.toDataURL('image/jpeg', 0.92));
+    };
+    img.src = dataUrl;
+  });
+}
+
+// Normaliza a JPEG para no inflar el almacenamiento (El upscaler devuelve PNG)
+function toJpegIfNeeded(dataUrl) {
+  if (/^data:image\/jpe?g/i.test(dataUrl)) return Promise.resolve(dataUrl);
+  return new Promise(res => {
+    const i = new Image();
+    i.onload = () => { const c = document.createElement('canvas'); c.width = i.naturalWidth; c.height = i.naturalHeight; c.getContext('2d').drawImage(i, 0, 0); res(c.toDataURL('image/jpeg', 0.92)); };
+    i.onerror = () => res(dataUrl);
+    i.src = dataUrl;
+  });
+}
+
+async function upscaleOne(i, silent) {
+  const ph = cur.photos[i]; if (!ph) return;
+  const scale = parseInt(document.getElementById('up-scale').value) || 2;
+  const status = document.getElementById('upscale-status');
+  if (status) status.innerHTML = '<div class="loader"><span></span><span></span><span></span></div> Mejorando…';
+  ph.hi = await toJpegIfNeeded(await upscaleImage(ph.data, scale, p => {
+    if (status) status.textContent = 'Mejorando… ' + (Math.round((p || 0) * 100)) + '%';
+  }));
+  if (!silent) { await IDB.put(cur); renderPhotosGrid(); renderWMPhotoSelect(); toast('Foto mejorada ×' + scale); }
+  return ph.hi;
+}
+
+async function upscaleAll() {
+  const n = (cur.photos || []).length;
+  if (!n) { toast('Subí fotos primero', true); return; }
+  const scale = parseInt(document.getElementById('up-scale').value) || 2;
+  const btn = document.getElementById('btn-upscale-all');
+  const status = document.getElementById('upscale-status');
+  const wrap = document.getElementById('up-progress-wrap');
+  const bar = document.getElementById('up-progress');
+  btn.disabled = true; wrap.style.display = '';
+  for (let i = 0; i < n; i++) {
+    status.textContent = `Mejorando ${i + 1}/${n}…`;
+    await upscaleOne(i, true);
+    bar.style.width = Math.round(((i + 1) / n) * 100) + '%';
+  }
+  await IDB.put(cur); renderPhotosGrid(); renderWMPhotoSelect();
+  btn.disabled = false; status.textContent = '✓ ' + n + ' foto' + (n > 1 ? 's' : '') + ' mejorada' + (n > 1 ? 's' : '');
+  setTimeout(() => { wrap.style.display = 'none'; bar.style.width = '0%'; }, 1500);
+  toast('Fotos mejoradas ×' + scale);
+}
+
+// ═══════════════════════════════════════════
+// WATERMARK
+// ═══════════════════════════════════════════
+function renderWMPhotoSelect() {
+  const wrap = document.getElementById('wm-photo-select'); if (!wrap) return;
+  const photos = cur.photos || [];
+  if (!photos.length) { wrap.innerHTML = '<div style="color:var(--muted);font-size:12px">Cargá fotos primero (paso anterior)</div>'; return; }
+  wrap.innerHTML = photos.map((ph, i) => `
+    <div class="wm-thumb ${wmPhotoIdx === i ? 'wm-sel' : ''}" onclick="selectWMPhoto(${i})">
+      <img src="${effPhoto(ph)}" alt="${escHtml(ph.name)}">
+    </div>`).join('');
+}
+function selectWMPhoto(i) { wmPhotoIdx = i; renderWMPhotoSelect(); renderWatermark(); }
+function clearWMCanvas() {
+  const canvas = document.getElementById('wm-canvas'), empty = document.getElementById('wm-empty');
+  if (canvas) canvas.style.display = 'none';
+  if (empty) empty.style.display = '';
+}
+function drawWatermark(ctx, cw, ch, logoW, logoH, pos, margin, opacity) {
+  const lw = Math.round(cw * logoW / 100);
+  const lh = Math.round(lw * logoImg.naturalHeight / logoImg.naturalWidth);
+  let x, y;
+  if (pos === 'br') { x = cw - lw - margin; y = ch - lh - margin; }
+  else if (pos === 'bl') { x = margin; y = ch - lh - margin; }
+  else if (pos === 'tr') { x = cw - lw - margin; y = margin; }
+  else if (pos === 'tl') { x = margin; y = margin; }
+  else { x = (cw - lw) / 2; y = (ch - lh) / 2; }
+  ctx.globalAlpha = opacity;
+  ctx.drawImage(logoImg, x, y, lw, lh);
+  ctx.globalAlpha = 1;
+}
+function renderWatermark() {
+  const canvas = document.getElementById('wm-canvas'), empty = document.getElementById('wm-empty');
+  if (!canvas) return;
+  if (wmPhotoIdx === null || !cur.photos || !cur.photos[wmPhotoIdx]) { clearWMCanvas(); return; }
+  const pos = document.getElementById('wm-pos')?.value || 'br';
+  const sizePct = parseInt(document.getElementById('wm-size')?.value || 20);
+  const opacity = parseInt(document.getElementById('wm-opacity')?.value || 80) / 100;
+  const margin = parseInt(document.getElementById('wm-margin')?.value || 20);
+  const baseImg = new Image();
+  baseImg.onload = () => {
+    canvas.width = baseImg.naturalWidth; canvas.height = baseImg.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(baseImg, 0, 0);
+    if (logoLoaded && cur.logo) drawWatermark(ctx, canvas.width, canvas.height, sizePct, 0, pos, margin, opacity);
+    canvas.style.display = 'block'; empty.style.display = 'none';
+  };
+  baseImg.src = effPhoto(cur.photos[wmPhotoIdx]);
+}
+async function applyWatermarks() {
+  if (!cur.photos || !cur.photos.length) { goStep(3); return; }
+  if (!logoLoaded || !cur.logo) { toast('Cargá el logo primero para la marca de agua'); goStep(3); return; }
+  const all = document.getElementById('wm-all')?.value === '1';
+  const pos = document.getElementById('wm-pos')?.value || 'br';
+  const sizePct = parseInt(document.getElementById('wm-size')?.value || 20);
+  const opacity = parseInt(document.getElementById('wm-opacity')?.value || 80) / 100;
+  const margin = parseInt(document.getElementById('wm-margin')?.value || 20);
+  const targets = all ? cur.photos.map((_, i) => i) : (wmPhotoIdx !== null ? [wmPhotoIdx] : []);
+  if (!targets.length) { goStep(3); return; }
+  watermarkedPhotos = [];
+  for (const idx of targets) {
+    const ph = cur.photos[idx];
+    const dataUrl = await new Promise(res => {
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+        const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+        drawWatermark(ctx, c.width, c.height, sizePct, 0, pos, margin, opacity);
+        res(c.toDataURL('image/jpeg', 0.92));
+      };
+      img.src = effPhoto(ph);
+    });
+    watermarkedPhotos.push({ name: ph.name.replace(/\.[^.]+$/, '') + '_wm.jpg', dataUrl, source: 'wm' });
+  }
+  toast(watermarkedPhotos.length + ' foto' + (watermarkedPhotos.length > 1 ? 's' : '') + ' procesada' + (watermarkedPhotos.length > 1 ? 's' : ''));
+}
+
+// ═══════════════════════════════════════════
+// REFERENCIAS IG + VISIÓN
+// ═══════════════════════════════════════════
+function handleRefs(e) {
+  const files = Array.from(e.target.files); if (!files.length) return;
+  let loaded = 0;
+  files.forEach(f => {
+    const rd = new FileReader();
+    rd.onload = ev => {
+      cur.refs.push({ id: 'r_' + Date.now() + Math.random().toString(36).slice(2, 5), name: f.name, data: ev.target.result, analysis: null });
+      loaded++;
+      if (loaded === files.length) { IDB.put(cur); renderRefs(); toast(files.length + ' captura' + (files.length > 1 ? 's' : '') + ' agregada' + (files.length > 1 ? 's' : '')); }
+    };
+    rd.readAsDataURL(f);
+  });
+  e.target.value = '';
+}
+function removeRef(id) {
+  cur.refs = cur.refs.filter(r => r.id !== id);
+  if (curStyle && !cur.refs.find(r => r.analysis)) curStyle = null;
+  IDB.put(cur); renderRefs(); renderStyleSummary();
+}
+function renderRefs() {
+  const grid = document.getElementById('refs-grid'); if (!grid) return;
+  const refs = cur.refs || [];
+  document.getElementById('ref-count').textContent = refs.length + ' captura' + (refs.length !== 1 ? 's' : '');
+  if (!refs.length) { grid.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px 0">Ninguna captura aún</div>'; return; }
+  grid.innerHTML = refs.map(r => {
+    const a = r.analysis;
+    const pal = a && a.palette ? a.palette : [];
+    return `
+      <div class="ref-card">
+        <button class="ref-rm" onclick="removeRef('${r.id}')">✕</button>
+        <img src="${r.data}" alt="${escHtml(r.name)}">
+        <div class="ref-body">
+          <div class="ref-name">${escHtml(r.name)}</div>
+          ${a ? `<div class="palette">${pal.slice(0, 6).map(c => `<span class="swatch" style="background:${escHtml(c)}" title="${escHtml(c)}"></span>`).join('')}</div>` : '<div class="pill-hint" style="margin-top:4px">Sin analizar</div>'}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+const STYLE_SYSTEM = 'Eres un director de arte experto en branding de Instagram. Analizás capturas de pantalla y devolvés SOLO un objeto JSON válido, sin texto extra ni markdown.';
+const STYLE_PROMPT = `Analizá esta captura de Instagram y devolvé EXACTAMENTE este JSON en español:
+{
+  "palette": ["#hex1","#hex2","#hex3","#hex4","#hex5"],
+  "fonts": [{"role":"titular","familia":"ej. sans-serif geométrica bold, parecida a Poppins","peso":"700"}],
+  "layout": "descripción del layout (grilla, márgenes, uso de fotos)",
+  "mood": "3 adjetivos del estilo",
+  "textStyle": "cómo se usa el texto (mayúsculas, tamaño, tracking, emojis)",
+  "captionTone": "tono de los captions detectado",
+  "notas": "qué debería replicar para mantener coherencia visual"
+}
+Devolvé solo el JSON.`;
+
+async function analyzeRefs() {
+  const refs = (cur.refs || []).filter(r => !r.analysis);
+  if (!refs.length) {
+    const anyAnalyzed = (cur.refs || []).some(r => r.analysis);
+    toast(anyAnalyzed ? 'Todas ya están analizadas' : 'Subí capturas primero');
+    return;
+  }
+  const btn = document.getElementById('btn-analyze');
+  const status = document.getElementById('analyze-status');
+  const wrap = document.getElementById('ref-progress-wrap');
+  const bar = document.getElementById('ref-progress');
+  btn.disabled = true; wrap.style.display = '';
+  let done = 0;
+  try {
+    for (const r of refs) {
+      status.textContent = `Analizando ${done + 1}/${refs.length}…`;
+      const img = splitDataUrl(r.data);
+      const out = await callAI({ system: STYLE_SYSTEM, prompt: STYLE_PROMPT, images: img ? [img] : [], json: true, maxTokens: 900, temp: 0.4 });
+      r.analysis = parseJSON(out);
+      done++;
+      bar.style.width = Math.round((done / refs.length) * 100) + '%';
+      if (!curStyle || (r.analysis && r.analysis.palette)) curStyle = r.analysis;
+    }
+    cur.styleRef = curStyle;
+    await IDB.put(cur);
+    renderRefs(); renderStyleSummary();
+    status.textContent = '✓ Listo';
+    toast('Estilo analizado');
+  } catch (e) {
+    status.textContent = '';
+    toast(e.message, true);
+  }
+  btn.disabled = false;
+  setTimeout(() => { wrap.style.display = 'none'; bar.style.width = '0%'; }, 1500);
+}
+
+function renderStyleSummary() {
+  const card = document.getElementById('style-summary-card');
+  const box = document.getElementById('style-summary');
+  if (!card || !box) return;
+  const a = curStyle;
+  if (!a) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  const pal = (a.palette || []).map(c => `<span class="swatch" style="background:${escHtml(c)}" title="${escHtml(c)}"></span>`).join('');
+  const fonts = (a.fonts || []).map(f => `<b>${escHtml(f.role || 'fuente')}:</b> ${escHtml(f.familia || '')} ${f.peso ? '(' + escHtml(f.peso) + ')' : ''}`).join('<br>');
+  box.innerHTML = `
+    <div class="analysis-box">
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">${pal}</div>
+      ${fonts ? '<div style="margin-bottom:8px">' + fonts + '</div>' : ''}
+      ${a.layout ? `<div><b>Layout:</b> ${escHtml(a.layout)}</div>` : ''}
+      ${a.mood ? `<div><b>Mood:</b> ${escHtml(a.mood)}</div>` : ''}
+      ${a.textStyle ? `<div><b>Texto:</b> ${escHtml(a.textStyle)}</div>` : ''}
+      ${a.captionTone ? `<div><b>Captions:</b> ${escHtml(a.captionTone)}</div>` : ''}
+      ${a.notas ? `<div><b>A replicar:</b> ${escHtml(a.notas)}</div>` : ''}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+// AI CALLS (Gemini / LM Studio)
+// ═══════════════════════════════════════════
+function splitDataUrl(u) {
+  const m = /^data:([^;]+);base64,(.*)$/.exec(u || '');
+  return m ? { mime: m[1], b64: m[2] } : null;
+}
+function parseJSON(txt) {
+  if (!txt) return null;
+  let t = txt.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+  try { return JSON.parse(t); }
+  catch { const m = t.match(/[{[][\s\S]*[}\]]/); if (m) { try { return JSON.parse(m[0]); } catch {} } return null; }
+}
+
+async function callAI({ system, prompt, images = [], json = false, maxTokens = 1200, temp = 0.8 }) {
+  if (settings.backend === 'gemini') return callGemini({ system, prompt, images, json, maxTokens, temp });
+  return callLMStudio({ system, prompt, images, json, maxTokens, temp });
+}
+
+async function callGemini({ system, prompt, images, json, maxTokens, temp }) {
+  if (!settings.geminiKey) throw new Error('Falta la API key de Gemini. Abrí Ajustes ⚙.');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(settings.geminiModel)}:generateContent?key=${encodeURIComponent(settings.geminiKey)}`;
+  const parts = [{ text: prompt }];
+  images.forEach(im => parts.push({ inlineData: { mimeType: im.mime, data: im.b64 } }));
+  const body = { contents: [{ role: 'user', parts }], generationConfig: { temperature: temp, maxOutputTokens: maxTokens } };
+  if (system) body.systemInstruction = { parts: [{ text: system }] };
+  if (json) body.generationConfig.responseMimeType = 'application/json';
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!r.ok) { const t = await r.text(); throw new Error('Gemini ' + r.status + ': ' + t.slice(0, 240)); }
+  const d = await r.json();
+  const cand = (d.candidates || [])[0];
+  const text = ((cand && cand.content && cand.content.parts) || []).map(p => p.text || '').join('');
+  if (!text) throw new Error('Respuesta vacía de Gemini' + (cand && cand.finishReason ? ' (' + cand.finishReason + ')' : ''));
+  return text;
+}
+
+async function callLMStudio({ system, prompt, images, json, maxTokens, temp }) {
+  const base = (settings.lmUrl || 'http://localhost:1234').replace(/\/$/, '');
+  const content = [{ type: 'text', text: prompt }];
+  images.forEach(im => content.push({ type: 'image_url', image_url: { url: `data:${im.mime};base64,${im.b64}` } }));
+  const messages = [];
+  if (system) messages.push({ role: 'system', content: system + (json ? ' Respondé SOLO con JSON válido.' : '') });
+  messages.push({ role: 'user', content: images.length ? content : prompt });
+  try {
+    const r = await fetch(base + '/v1/chat/completions', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: settings.lmModel || 'local-model', messages, max_tokens: maxTokens, temperature: temp, stream: false }),
+      signal: AbortSignal.timeout(120000)
+    });
+    if (!r.ok) throw new Error('LM Studio respondió ' + r.status);
+    const d = await r.json();
+    return (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
+  } catch (e) {
+    throw new Error('No se pudo conectar con LM Studio. Verificá que esté abierto con un modelo cargado y CORS activo. (' + e.message + ')');
+  }
+}
+
+// ═══════════════════════════════════════════
+// CONTENT GENERATION
+// ═══════════════════════════════════════════
+const PROMPT_LABELS = {
+  caption_ig: 'un caption para Instagram con hashtags',
+  stories: '5 ideas concretas de stories para Instagram',
+  bio: 'una bio de perfil de Instagram (máximo 150 caracteres)',
+  web_about: 'un texto "Sobre nosotros" para la web (2-3 párrafos)',
+  web_mission: 'un texto de misión y valores para la web',
+  volunteer: 'una publicación llamando a voluntarios'
+};
+const LANG_NAMES = { pt: 'portugués brasileño', es: 'español argentino', en: 'inglés' };
+
+function selChip(btn) { contentType = btn.dataset.type; document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); btn.classList.add('active'); }
+function selLang(btn) { lang = btn.dataset.lang; document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active')); btn.classList.add('active'); }
+
+async function generateContent() {
+  const btn = document.getElementById('btn-gen');
+  const status = document.getElementById('gen-status');
+  const area = document.getElementById('output-area');
+  const extra = document.getElementById('extra-ctx')?.value || '';
+  if (settings.backend === 'gemini' && !settings.geminiKey) {
+    area.innerHTML = '<div class="analysis-box" style="color:var(--red)">Falta la API key de Gemini. Tocá <b>⚙ Ajustes</b> arriba a la derecha y pegala.</div>';
+    return;
+  }
+  btn.disabled = true;
+  status.innerHTML = '<div class="loader"><span></span><span></span><span></span></div> Generando…';
+  area.innerHTML = '';
+  try {
+    const text = await callAI({ system: SYSTEM_MARKETING, prompt: buildPrompt(extra), maxTokens: 1400, temp: 0.8 });
+    generatedText = text.trim();
+    renderOutput();
+    status.textContent = '✓ Listo';
+    document.getElementById('btn-to-export').style.display = '';
+    setTimeout(() => { status.textContent = ''; }, 3000);
+  } catch (err) {
+    status.textContent = '';
+    area.innerHTML = `<div class="analysis-box" style="color:var(--red);border-color:rgba(255,95,126,0.3)">
+      <strong>No se pudo generar.</strong><br>${escHtml(err.message)}</div>`;
+  }
+  btn.disabled = false;
+}
+
+const SYSTEM_MARKETING = 'Eres un experto en marketing digital para ONGs y organizaciones sociales de Brasil. Respondés SOLO con el contenido listo para publicar, sin introducciones ni explicaciones.';
+
+function buildPrompt(extra) {
+  const p = cur;
+  let style = '';
+  if (curStyle) {
+    const pal = (curStyle.palette || []).join(', ');
+    style = `\nESTILO (de las capturas de Instagram del lugar):
+- Paleta: ${pal || '—'}
+- Mood: ${curStyle.mood || '—'}
+- Uso del texto: ${curStyle.textStyle || '—'}
+- Tono de captions: ${curStyle.captionTone || '—'}
+- A replicar: ${curStyle.notas || '—'}`;
+  }
+  return `Generá ${PROMPT_LABELS[contentType]} en ${LANG_NAMES[lang]} para esta organización.
+
+DATOS:
+- Nombre: ${p.name || '—'}
+- Ciudad: ${p.city || '—'}
+- Tipo: ${p.type || '—'}
+- Misión: ${p.mission || '—'}
+- Tono: ${p.tone || 'cercano y auténtico'}
+- Colores: ${p.colors || '—'}
+- Instagram: ${p.ig || '—'}
+- Website: ${p.website || '—'}
+- Hashtags habituales: ${p.tags || '—'}${style}
+${extra ? '\nCONTEXTO EXTRA:\n' + extra : ''}
+
+Respondé SOLO con el contenido listo para publicar.`;
+}
+
+function renderOutput() {
+  const area = document.getElementById('output-area'); if (!area) return;
+  area.innerHTML = `
+    <div class="output-block">
+      <div class="output-label">
+        <span>${PROMPT_LABELS[contentType]}</span>
+        <button class="btn btn-ghost btn-sm" onclick="copyOutput()">Copiar</button>
+      </div>
+      <div class="output-text" contenteditable="true" id="out-text">${escHtml(generatedText)}</div>
+    </div>`;
+}
+function copyOutput() {
+  const el = document.getElementById('out-text'); if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(() => toast('Copiado'));
+}
+
+// ═══════════════════════════════════════════
+// TEMPLATES (1080)
+// ═══════════════════════════════════════════
+function hexLetter(c) { const r = parseInt(c.slice(1, 3), 16), g = parseInt(c.slice(3, 5), 16), b = parseInt(c.slice(5, 7), 16); return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#0e0f14' : '#ffffff'; }
+
+async function makeTemplate() {
+  const fmt = document.getElementById('tpl-format').value;
+  const font = document.getElementById('tpl-font').value;
+  const W = 1080, H = fmt === 'story' ? 1920 : (fmt === 'feed45' ? 1350 : 1080);
+  const title = document.getElementById('tpl-title').value.trim() || cur.name || 'Studio Brasil';
+  await ensureFont(font);
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const ctx = c.getContext('2d');
+  const pal = (curStyle && curStyle.palette && curStyle.palette.length) ? curStyle.palette : ['#0e0f14', '#3dffa0', '#e4e6f0'];
+  const bg = pal[0], accent = pal[1] || pal[0], fg = hexLetter(bg);
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  const src = (watermarkedPhotos[0] && watermarkedPhotos[0].dataUrl) || (cur.photos[0] ? effPhoto(cur.photos[0]) : null);
+  if (src) {
+    const img = await loadImage(src);
+    const boxH = Math.round(H * 0.62), boxY = Math.round(H * 0.06), boxX = Math.round(W * 0.06), boxW = W - boxX * 2;
+    ctx.save(); roundRect(ctx, boxX, boxY, boxW, boxH, 36); ctx.clip();
+    const s = Math.max(boxW / img.naturalWidth, boxH / img.naturalHeight);
+    const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+    ctx.drawImage(img, boxX + (boxW - dw) / 2, boxY + (boxH - dh) / 2, dw, dh);
+    ctx.restore();
+    var textTop = boxY + boxH + Math.round(H * 0.05);
+  } else { var textTop = Math.round(H * 0.3); }
+
+  ctx.fillStyle = accent; ctx.fillRect(Math.round(W * 0.06), textTop, 90, 8);
+  textTop += 40;
+  ctx.fillStyle = fg; ctx.textBaseline = 'top';
+  const big = /Bebas|Syne/.test(font) ? '800' : '700';
+  ctx.font = `${big} ${Math.round(W * 0.085)}px "${font}", sans-serif`;
+  const lines = wrapText(ctx, title, W * 0.88);
+  lines.slice(0, 3).forEach(ln => { ctx.fillText(ln, Math.round(W * 0.06), textTop); textTop += Math.round(W * 0.095); });
+  ctx.fillStyle = fg; ctx.globalAlpha = 0.7;
+  ctx.font = `500 ${Math.round(W * 0.03)}px "Inter", sans-serif`;
+  ctx.fillText('@' + (cur.ig || '').replace(/^@/, ''), Math.round(W * 0.06), H - Math.round(W * 0.09));
+  ctx.globalAlpha = 1;
+
+  const name = 'post_' + (cur.name || 'studio').replace(/\s+/g, '_') + '_' + (templatePosts.length + 1) + '.jpg';
+  templatePosts.push({ name, dataUrl: c.toDataURL('image/jpeg', 0.92) });
+  renderTemplates();
+  toast('Plantilla generada');
+}
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function wrapText(ctx, text, maxW) {
+  const words = text.split(/\s+/); const lines = []; let line = '';
+  for (const w of words) { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t; }
+  if (line) lines.push(line); return lines;
+}
+function loadImage(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
+const loadedFonts = {};
+async function ensureFont(f) {
+  if (loadedFonts[f]) return;
+  try { await document.fonts.load(`700 40px "${f}"`); await document.fonts.load(`800 40px "${f}"`); loadedFonts[f] = true; } catch {}
+}
+function renderTemplates() {
+  const grid = document.getElementById('template-grid'); if (!grid) return;
+  if (!templatePosts.length) { grid.innerHTML = ''; return; }
+  grid.innerHTML = templatePosts.map(t => `
+    <div class="result-photo-card">
+      <img src="${t.dataUrl}" alt="${escHtml(t.name)}">
+      <div class="result-photo-footer">
+        <span class="result-photo-name">${escHtml(t.name)}</span>
+        <button class="btn btn-ghost btn-sm" onclick="downloadByName('${t.name}','tpl')">⬇</button>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════
+function renderExport() {
+  const outEl = document.getElementById('out-text');
+  if (outEl) generatedText = outEl.innerText;
+  const photoGrid = document.getElementById('export-photos-grid');
+  if (photoGrid) {
+    if (!watermarkedPhotos.length) {
+      photoGrid.innerHTML = '<div style="color:var(--muted);font-size:13px">No se procesaron fotos con marca de agua. Volvé al paso de marca de agua.</div>';
+    } else {
+      photoGrid.innerHTML = watermarkedPhotos.map(ph => `
+        <div class="result-photo-card">
+          <img src="${ph.dataUrl}" alt="${escHtml(ph.name)}">
+          <div class="result-photo-footer">
+            <span class="result-photo-name">${escHtml(ph.name)}</span>
+            <button class="btn btn-ghost btn-sm" onclick="downloadByName('${escHtml(ph.name)}','wm')">⬇</button>
+          </div>
+        </div>`).join('');
+    }
+  }
+  const textArea = document.getElementById('export-text-area');
+  if (textArea) textArea.textContent = generatedText || 'Todavía no generaste contenido. Volvé al paso anterior.';
+  renderTemplates();
+  const tplTitle = document.getElementById('tpl-title');
+  if (tplTitle && !tplTitle.value) tplTitle.value = cur.name || '';
+}
+
+function downloadByName(name, kind) {
+  const list = kind === 'tpl' ? templatePosts : watermarkedPhotos;
+  const item = list.find(p => p.name === name); if (!item) return;
+  const a = document.createElement('a'); a.href = item.dataUrl; a.download = name; a.click();
+}
+function copyAllText() {
+  const el = document.getElementById('export-text-area'); if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => toast('Texto copiado'));
+}
+async function downloadAll() {
+  if (!window.JSZip) { toast('JSZip no cargó', true); return; }
+  if (!watermarkedPhotos.length && !templatePosts.length && !generatedText) { toast('Nada para exportar todavía'); return; }
+  const zip = new JSZip();
+  const folder = zip.folder((cur.name || 'studio-brasil').replace(/\s+/g, '_'));
+  watermarkedPhotos.forEach(ph => folder.file('fotos/' + ph.name, ph.dataUrl.split(',')[1], { base64: true }));
+  templatePosts.forEach(t => folder.file('plantillas/' + t.name, t.dataUrl.split(',')[1], { base64: true }));
+  if (generatedText) folder.file('contenido.txt', generatedText);
+  if (curStyle) folder.file('estilo-referencia.json', JSON.stringify(curStyle, null, 2));
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (cur.name || 'studio-brasil').replace(/\s+/g, '_') + '.zip';
+  a.click();
+  toast('Descargando ZIP…');
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function escHtml(s) { return (s == null ? '' : String(s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+let toastTimer = null;
+function toast(msg, isErr = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isErr ? ' error' : '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), isErr ? 4200 : 2400);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettings(); });
+
+init();
+</script>
+</body>
+</html>
