@@ -1298,19 +1298,39 @@ function pickBestModel(names) {
   return pool.slice().sort((a, b) => score(b) - score(a))[0] || null;
 }
 
-async function recoverGeminiModel() {
+let _geminiModelsCache = { names: [], at: 0 };
+async function fetchGeminiModelNames(force) {
+  if (!force && _geminiModelsCache.names.length && Date.now() - _geminiModelsCache.at < 300000) return _geminiModelsCache.names;
   try {
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(settings.geminiKey));
-    if (!r.ok) return null;
+    if (!r.ok) return _geminiModelsCache.names;
     const d = await r.json();
     const names = (d.models || [])
       .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
       .map(m => m.name.replace(/^models\//, ''));
-    return pickBestModel(names);
-  } catch { return null; }
+    _geminiModelsCache = { names, at: Date.now() };
+    return names;
+  } catch { return _geminiModelsCache.names; }
 }
 
-async function callGemini({ system, prompt, images, json, maxTokens, temp, _retried }) {
+async function recoverGeminiModel() {
+  try { return pickBestModel(await fetchGeminiModelNames(true)); } catch { return null; }
+}
+
+// Candidatos a modelo con visión (excluye los de imagen/audio/código y los ya probados)
+function visionCandidates(names, tried) {
+  const bad = /image|embedding|tts|audio|vision|code|thinking|exp|embed/i;
+  const pool = names.filter(n => !tried.includes(n) && !bad.test(n) && /flash|pro/i.test(n));
+  const score = n => (/pro/i.test(n) ? 100 : 0) + (/flash/i.test(n) ? 50 : 0) + (/latest/i.test(n) ? 10 : 0);
+  return pool.sort((a, b) => score(b) - score(a)).slice(0, 5);
+}
+
+function setActiveGeminiModel(name) {
+  settings.geminiModel = name; persistSettings(); refreshAIStatus();
+  const sel = document.getElementById('s-gemini-model'); if (sel) sel.innerHTML = '<option>' + name + '</option>';
+}
+
+async function callGemini({ system, prompt, images, json, maxTokens, temp, _retried, _visionTried }) {
   if (!settings.geminiKey) throw new Error('Falta la API key de Gemini. Abrí Ajustes ⚙.');
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(settings.geminiModel)}:generateContent?key=${encodeURIComponent(settings.geminiKey)}`;
   const parts = [{ text: prompt }];
@@ -1327,20 +1347,28 @@ async function callGemini({ system, prompt, images, json, maxTokens, temp, _retr
   }
   if (!r.ok) {
     const t = await r.text();
-    // Auto-recuperación: Google retira modelos; buscamos uno vigente y reintentamos una vez
-    if (!_retried && (r.status === 404 || /no longer available|not found|update your code|not supported/i.test(t))) {
+    const visionErr = /does not support image input|not support image|multimodal|image input|doesn't support image/i.test(t);
+    // Auto-recuperación 1: el modelo no lee imágenes -> probamos otros modelos multimodales
+    if (visionErr && images && images.length) {
+      const tried = _visionTried || [settings.geminiModel];
+      const next = visionCandidates(await fetchGeminiModelNames(), tried)[0];
+      if (next) {
+        setActiveGeminiModel(next);
+        toast('Probando modelo con visión: ' + next);
+        return callGemini({ system, prompt, images, json, maxTokens, temp, _visionTried: tried.concat(next) });
+      }
+    }
+    // Auto-recuperación 2: Google retiró el modelo -> elegimos uno vigente y reintentamos una vez
+    if (!_retried && !visionErr && (r.status === 404 || /no longer available|not found|update your code|not supported/i.test(t))) {
       const fixed = await recoverGeminiModel();
       if (fixed && fixed !== settings.geminiModel) {
-        settings.geminiModel = fixed; persistSettings(); refreshAIStatus();
-        const sel = document.getElementById('s-gemini-model'); if (sel) sel.innerHTML = '<option>' + fixed + '</option>';
+        setActiveGeminiModel(fixed);
         toast('Modelo actualizado a ' + fixed);
-        return callGemini({ system, prompt, images, json, maxTokens, temp, _retried: true });
+        return callGemini({ system, prompt, images, json, maxTokens, temp, _retried: true, _visionTried });
       }
     }
     let hint = t.slice(0, 240);
-    if (/does not support image input|not support image|multimodal|image input|doesn't support image/i.test(t)) {
-      hint = 'El modelo "' + settings.geminiModel + '" no lee imágenes. En ⚙ Ajustes → "Cargar modelos disponibles" elegí uno multimodal (los "flash" o "pro" suelen servir) y guardá.';
-    }
+    if (visionErr) hint = 'Ningún modelo de tu cuenta aceptó imágenes. En ⚙ Ajustes verificá que tengas acceso a un modelo multimodal (con visión).';
     else if (r.status === 429) hint = 'Se agotó la cuota gratis por ahora. Esperá unos minutos o probá con otra cuenta/key.';
     else if (r.status === 400 && /API key not valid/i.test(t)) hint = 'La API key no es válida. Creá una nueva en aistudio.google.com/apikey.';
     else if (r.status === 403 && /leaked|reported/i.test(t)) hint = 'Google marcó esta key como filtrada. Creá una nueva en aistudio.google.com/apikey.';
