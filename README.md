@@ -1,6 +1,6 @@
-# Studio Brasil
+# Content Studio
 
-Herramienta interna (un solo archivo, `index.html`) para producir el
+Herramienta (un solo archivo, `index.html`) para producir el
 contenido de Instagram de un lugar: cargás el perfil, las fotos y el logo, y
 la app te devuelve las fotos con marca de agua más el texto listo para
 publicar (caption, stories, bio, etc.).

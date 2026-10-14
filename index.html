@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Studio Brasil</title>
+<title>Content Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=Poppins:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -228,7 +228,7 @@ input[type=range] { width:100%; accent-color:var(--purple); }
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-mark">✦ Studio Brasil <span>/ contenido para voluntariado</span></div>
+  <div class="topbar-mark">✦ Content Studio <span>/ contenido para redes</span></div>
   <div class="topbar-status">
     <div class="dot-live" id="ai-dot" style="background:var(--muted);box-shadow:none"></div>
     <span id="ai-label">IA sin configurar</span>
@@ -288,10 +288,10 @@ input[type=range] { width:100%; accent-color:var(--purple); }
       <div class="card">
         <div class="card-head"><div class="card-title">Datos del lugar</div></div>
         <div class="fgrid">
-          <div class="fgroup"><label>Nombre</label><input type="text" id="f-name" placeholder="Casa do Sol" oninput="schedSave()"></div>
-          <div class="fgroup"><label>Ciudad / Estado</label><input type="text" id="f-city" placeholder="Florianópolis, SC" oninput="schedSave()"></div>
+          <div class="fgroup"><label>Nombre</label><input type="text" id="f-name" placeholder="Refugio Ejemplo" oninput="schedSave()"></div>
+          <div class="fgroup"><label>Ciudad / Estado</label><input type="text" id="f-city" placeholder="Ciudad, Estado" oninput="schedSave()"></div>
           <div class="fgroup"><label>Tipo de organización</label><input type="text" id="f-type" placeholder="ONG, hostel comunitario…" oninput="schedSave()"></div>
-          <div class="fgroup"><label>Instagram</label><input type="text" id="f-ig" placeholder="@casadosol" oninput="schedSave()"></div>
+          <div class="fgroup"><label>Instagram</label><input type="text" id="f-ig" placeholder="@lugar_de_ejemplo" oninput="schedSave()"></div>
           <div class="fgroup"><label>Website</label><input type="url" id="f-web" placeholder="https://…" oninput="schedSave()"></div>
           <div class="fgroup"><label>Colores de marca</label><input type="text" id="f-colors" placeholder="verde, blanco, terracota" oninput="schedSave()"></div>
           <div class="fgroup full"><label>Misión — ¿qué hacen?</label>
@@ -606,7 +606,7 @@ const IDB = {
   open() {
     if (this.db) return Promise.resolve(this.db);
     return new Promise((res, rej) => {
-      const r = indexedDB.open('studio-brasil', 1);
+      const r = indexedDB.open('content-studio', 1);
       r.onupgradeneeded = e => {
         const d = e.target.result;
         if (!d.objectStoreNames.contains('places')) d.createObjectStore('places', { keyPath: 'id' });
@@ -1389,7 +1389,7 @@ async function makeTemplate() {
   const fmt = document.getElementById('tpl-format').value;
   const font = document.getElementById('tpl-font').value;
   const W = 1080, H = fmt === 'story' ? 1920 : (fmt === 'feed45' ? 1350 : 1080);
-  const title = document.getElementById('tpl-title').value.trim() || cur.name || 'Studio Brasil';
+  const title = document.getElementById('tpl-title').value.trim() || cur.name || 'Content Studio';
   await ensureFont(font);
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const ctx = c.getContext('2d');
@@ -1492,7 +1492,7 @@ async function downloadAll() {
   if (!window.JSZip) { toast('JSZip no cargó', true); return; }
   if (!watermarkedPhotos.length && !templatePosts.length && !generatedText) { toast('Nada para exportar todavía'); return; }
   const zip = new JSZip();
-  const folder = zip.folder((cur.name || 'studio-brasil').replace(/\s+/g, '_'));
+  const folder = zip.folder((cur.name || 'content-studio').replace(/\s+/g, '_'));
   watermarkedPhotos.forEach(ph => folder.file('fotos/' + ph.name, ph.dataUrl.split(',')[1], { base64: true }));
   templatePosts.forEach(t => folder.file('plantillas/' + t.name, t.dataUrl.split(',')[1], { base64: true }));
   if (generatedText) folder.file('contenido.txt', generatedText);
@@ -1500,7 +1500,7 @@ async function downloadAll() {
   const blob = await zip.generateAsync({ type: 'blob' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = (cur.name || 'studio-brasil').replace(/\s+/g, '_') + '.zip';
+  a.download = (cur.name || 'content-studio').replace(/\s+/g, '_') + '.zip';
   a.click();
   toast('Descargando ZIP…');
 }
