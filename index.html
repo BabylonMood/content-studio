@@ -624,11 +624,17 @@ const IDB = {
 // ═══════════════════════════════════════════
 // SETTINGS (localStorage)
 // ═══════════════════════════════════════════
-const DEFAULT_SETTINGS = { backend:'gemini', geminiKey:'', geminiModel:'gemini-2.5-flash', lmUrl:'http://localhost:1234', lmModel:'local-model' };
+const DEFAULT_SETTINGS = { backend:'gemini', geminiKey:'', geminiModel:'gemini-3.8-flash', lmUrl:'http://localhost:1234', lmModel:'local-model' };
+const DEPRECATED_GEMINI_MODELS = ['gemini-2.5-flash','gemini-2.5-pro','gemini-2.0-flash','gemini-2.0-flash-lite','gemini-1.5-flash','gemini-1.5-pro'];
 let settings = { ...DEFAULT_SETTINGS };
 
 function loadSettings() {
   try { Object.assign(settings, JSON.parse(localStorage.getItem('sb_settings')||'{}')); } catch {}
+  // Migración: Google retira modelos para cuentas nuevas; caemos a uno vigente sin tocar la key
+  if (!settings.geminiModel || DEPRECATED_GEMINI_MODELS.includes(settings.geminiModel)) {
+    settings.geminiModel = DEFAULT_SETTINGS.geminiModel;
+    try { localStorage.setItem('sb_settings', JSON.stringify(settings)); } catch {}
+  }
 }
 function persistSettings() { localStorage.setItem('sb_settings', JSON.stringify(settings)); }
 
@@ -692,7 +698,7 @@ function refreshAIStatus() {
 function openSettings() {
   document.getElementById('s-backend').value = settings.backend;
   document.getElementById('s-gemini-key').value = settings.geminiKey;
-  document.getElementById('s-gemini-model').innerHTML = '<option>'+(settings.geminiModel||'gemini-2.5-flash')+'</option>';
+  document.getElementById('s-gemini-model').innerHTML = '<option>'+(settings.geminiModel||'gemini-3.8-flash')+'</option>';
   document.getElementById('s-lm-url').value = settings.lmUrl;
   document.getElementById('s-lm-model').value = settings.lmModel;
   backendChanged();
@@ -707,7 +713,7 @@ function backendChanged() {
 function saveSettings() {
   settings.backend = document.getElementById('s-backend').value;
   settings.geminiKey = document.getElementById('s-gemini-key').value.trim();
-  settings.geminiModel = document.getElementById('s-gemini-model').value.trim() || 'gemini-2.5-flash';
+  settings.geminiModel = document.getElementById('s-gemini-model').value.trim() || 'gemini-3.8-flash';
   settings.lmUrl = document.getElementById('s-lm-url').value.trim() || 'http://localhost:1234';
   settings.lmModel = document.getElementById('s-lm-model').value.trim() || 'local-model';
   persistSettings();
@@ -733,7 +739,7 @@ async function loadGeminiModels() {
     const current = sel.value;
     sel.innerHTML = models.map(m => `<option>${m}</option>`).join('');
     if (models.includes(current)) sel.value = current;
-    else sel.value = models.find(m => m.includes('flash')) || models[0];
+    else sel.value = pickBestModel(models) || models[0];
     st.textContent = models.length + ' modelos';
   } catch (e) { st.textContent = 'Error: ' + e.message; }
 }
@@ -744,7 +750,7 @@ async function testAI() {
   try {
     if (document.getElementById('s-backend').value === 'gemini') {
       const key = document.getElementById('s-gemini-key').value.trim();
-      const model = document.getElementById('s-gemini-model').value.trim() || 'gemini-2.5-flash';
+      const model = document.getElementById('s-gemini-model').value.trim() || 'gemini-3.8-flash';
       if (!key) throw new Error('falta API key');
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1253,7 +1259,32 @@ async function callAI({ system, prompt, images = [], json = false, maxTokens = 1
   return callLMStudio({ system, prompt, images, json, maxTokens, temp });
 }
 
-async function callGemini({ system, prompt, images, json, maxTokens, temp }) {
+function pickBestModel(names) {
+  const flash = names.filter(n => /flash/i.test(n) && !/image|embedding|tts|audio|vision/i.test(n));
+  const pool = flash.length ? flash : names;
+  const score = n => {
+    let s = 0;
+    const v = n.match(/(\d+(?:\.\d+)?)/); if (v) s += parseFloat(v[1]) * 100;
+    if (/latest/i.test(n)) s += 1000;
+    if (/flash/i.test(n)) s += 50;
+    return s;
+  };
+  return pool.slice().sort((a, b) => score(b) - score(a))[0] || null;
+}
+
+async function recoverGeminiModel() {
+  try {
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(settings.geminiKey));
+    if (!r.ok) return null;
+    const d = await r.json();
+    const names = (d.models || [])
+      .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+      .map(m => m.name.replace(/^models\//, ''));
+    return pickBestModel(names);
+  } catch { return null; }
+}
+
+async function callGemini({ system, prompt, images, json, maxTokens, temp, _retried }) {
   if (!settings.geminiKey) throw new Error('Falta la API key de Gemini. Abrí Ajustes ⚙.');
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(settings.geminiModel)}:generateContent?key=${encodeURIComponent(settings.geminiKey)}`;
   const parts = [{ text: prompt }];
@@ -1262,7 +1293,24 @@ async function callGemini({ system, prompt, images, json, maxTokens, temp }) {
   if (system) body.systemInstruction = { parts: [{ text: system }] };
   if (json) body.generationConfig.responseMimeType = 'application/json';
   const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  if (!r.ok) { const t = await r.text(); throw new Error('Gemini ' + r.status + ': ' + t.slice(0, 240)); }
+  if (!r.ok) {
+    const t = await r.text();
+    // Auto-recuperación: Google retira modelos; buscamos uno vigente y reintentamos una vez
+    if (!_retried && (r.status === 404 || /no longer available|not found|update your code|not supported/i.test(t))) {
+      const fixed = await recoverGeminiModel();
+      if (fixed && fixed !== settings.geminiModel) {
+        settings.geminiModel = fixed; persistSettings(); refreshAIStatus();
+        const sel = document.getElementById('s-gemini-model'); if (sel) sel.innerHTML = '<option>' + fixed + '</option>';
+        toast('Modelo actualizado a ' + fixed);
+        return callGemini({ system, prompt, images, json, maxTokens, temp, _retried: true });
+      }
+    }
+    let hint = t.slice(0, 240);
+    if (r.status === 429) hint = 'Se agotó la cuota gratis por ahora. Esperá unos minutos o probá con otra cuenta/key.';
+    if (r.status === 400 && /API key not valid/i.test(t)) hint = 'La API key no es válida. Creá una nueva en aistudio.google.com/apikey.';
+    if (r.status === 403 && /leaked|reported/i.test(t)) hint = 'Google marcó esta key como filtrada. Creá una nueva en aistudio.google.com/apikey.';
+    throw new Error('Gemini ' + r.status + ': ' + hint);
+  }
   const d = await r.json();
   const cand = (d.candidates || [])[0];
   const text = ((cand && cand.content && cand.content.parts) || []).map(p => p.text || '').join('');
