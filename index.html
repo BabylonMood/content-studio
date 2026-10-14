@@ -1319,18 +1319,20 @@ async function recoverGeminiModel() {
 
 // Candidatos a modelo con visión (excluye los de imagen/audio/código y los ya probados)
 function visionCandidates(names, tried) {
-  const bad = /image|embedding|tts|audio|vision|code|thinking|exp|embed/i;
+  const bad = /embedding|tts|audio|vision|code|thinking|exp|embed|image-to-text/i;
   const pool = names.filter(n => !tried.includes(n) && !bad.test(n));
   const score = n => {
     let s = 0;
-    if (/pro/i.test(n)) s += 120;
-    if (/flash/i.test(n)) s += 60;
-    if (/latest/i.test(n)) s += 20;
-    if (/2\.5/i.test(n)) s += 10;
-    if (/3\.8|3\./i.test(n)) s += 5;
+    if (/pro/i.test(n)) s += 150;
+    if (/flash/i.test(n)) s += 80;
+    if (/latest/i.test(n)) s += 40;
+    if (/2\.5/i.test(n)) s += 20;
+    if (/3\.8|3\./i.test(n)) s += 15;
+    if (/vision/i.test(n)) s += 200;
+    if (/multimodal/i.test(n)) s += 200;
     return s;
   };
-  return pool.sort((a, b) => score(b) - score(a)).slice(0, 6);
+  return pool.sort((a, b) => score(b) - score(a)).slice(0, 8);
 }
 
 function setActiveGeminiModel(name) {
@@ -1365,7 +1367,7 @@ async function callGemini({ system, prompt, images, json, maxTokens, temp, _retr
       await new Promise(res => setTimeout(res, 900 + attempts * 800));
       continue;
     }
-    const visionErr = /does not support image input|not support image|multimodal|image input|doesn't support image|cannot read.*image/i.test(t);
+    const visionErr = /does not support image input|not support image|multimodal|image input|doesn't support image|cannot read.*image|does not support image inputs|image.*not supported/i.test(t);
     if (visionErr && images && images.length) {
       const tried = _visionTried || [settings.geminiModel];
       const candidates = visionCandidates(await fetchGeminiModelNames(), tried);
