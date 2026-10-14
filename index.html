@@ -1196,10 +1196,11 @@ async function analyzeRefs() {
   const bar = document.getElementById('ref-progress');
   btn.disabled = true; wrap.style.display = '';
   let done = 0;
+  const tick = startElapsed(status, s => `Analizando ${Math.min(done + 1, refs.length)}/${refs.length}… ${s}s (puede tardar)`);
   try {
     for (const r of refs) {
-      status.textContent = `Analizando ${done + 1}/${refs.length}…`;
-      const img = splitDataUrl(r.data);
+      const small = await downscaleDataUrl(r.data, 1024, 0.82);
+      const img = splitDataUrl(small);
       const out = await callAI({ system: STYLE_SYSTEM, prompt: STYLE_PROMPT, images: img ? [img] : [], json: true, maxTokens: 900, temp: 0.4 });
       r.analysis = parseJSON(out);
       done++;
@@ -1215,6 +1216,7 @@ async function analyzeRefs() {
     status.textContent = '';
     toast(e.message, true);
   }
+  clearInterval(tick);
   btn.disabled = false;
   setTimeout(() => { wrap.style.display = 'none'; bar.style.width = '0%'; }, 1500);
 }
@@ -1246,6 +1248,30 @@ function renderStyleSummary() {
 function splitDataUrl(u) {
   const m = /^data:([^;]+);base64,(.*)$/.exec(u || '');
   return m ? { mime: m[1], b64: m[2] } : null;
+}
+// Reduce la imagen antes de mandarla a la IA: sube mucho más rápido y no pierde calidad útil para el análisis
+function downscaleDataUrl(dataUrl, maxDim = 1024, quality = 0.82) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth, h = img.naturalHeight;
+      if (Math.max(w, h) <= maxDim) { res(dataUrl); return; }
+      const s = maxDim / Math.max(w, h);
+      const c = document.createElement('canvas');
+      c.width = Math.round(w * s); c.height = Math.round(h * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      res(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => res(dataUrl);
+    img.src = dataUrl;
+  });
+}
+// Cronómetro para que se vea que la IA está trabajando
+function startElapsed(el, render) {
+  const t0 = Date.now();
+  const tick = () => { el.innerHTML = render(Math.round((Date.now() - t0) / 1000)); };
+  tick();
+  return setInterval(tick, 1000);
 }
 function parseJSON(txt) {
   if (!txt) return null;
@@ -1292,7 +1318,13 @@ async function callGemini({ system, prompt, images, json, maxTokens, temp, _retr
   const body = { contents: [{ role: 'user', parts }], generationConfig: { temperature: temp, maxOutputTokens: maxTokens } };
   if (system) body.systemInstruction = { parts: [{ text: system }] };
   if (json) body.generationConfig.responseMimeType = 'application/json';
-  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  let r;
+  try {
+    r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(180000) });
+  } catch (e) {
+    if (e.name === 'TimeoutError' || e.name === 'AbortError') throw new Error('Gemini tardó demasiado (3 min) y se canceló. Reintentá o probá con menos capturas.');
+    throw new Error('No se pudo contactar a Gemini: ' + e.message);
+  }
   if (!r.ok) {
     const t = await r.text();
     // Auto-recuperación: Google retira modelos; buscamos uno vigente y reintentamos una vez
@@ -1375,7 +1407,7 @@ async function generateContent() {
     return;
   }
   btn.disabled = true;
-  status.innerHTML = '<div class="loader"><span></span><span></span><span></span></div> Generando…';
+  const tick = startElapsed(status, s => '<div class="loader"><span></span><span></span><span></span></div> Generando… ' + s + 's (puede tardar)');
   area.innerHTML = '';
   try {
     const text = await callAI({ system: SYSTEM_MARKETING, prompt: buildPrompt(extra), maxTokens: contentType === 'photo_video' ? 2200 : 1400, temp: 0.8 });
@@ -1389,6 +1421,7 @@ async function generateContent() {
     area.innerHTML = `<div class="analysis-box" style="color:var(--red);border-color:rgba(255,95,126,0.3)">
       <strong>No se pudo generar.</strong><br>${escHtml(err.message)}</div>`;
   }
+  clearInterval(tick);
   btn.disabled = false;
 }
 
