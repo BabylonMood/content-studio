@@ -453,6 +453,7 @@ input[type=range] { width:100%; accent-color:var(--purple); }
           <button class="chip" data-type="web_about" onclick="selChip(this)">🌐 Sobre nosotros</button>
           <button class="chip" data-type="web_mission" onclick="selChip(this)">💚 Misión & valores</button>
           <button class="chip" data-type="volunteer" onclick="selChip(this)">🙋 Llamado a voluntarios</button>
+          <button class="chip" data-type="photo_video" onclick="selChip(this)">🎬 Plan de fotos y videos</button>
         </div>
         <hr class="div">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
@@ -1299,7 +1300,17 @@ const PROMPT_LABELS = {
   bio: 'una bio de perfil de Instagram (máximo 150 caracteres)',
   web_about: 'un texto "Sobre nosotros" para la web (2-3 párrafos)',
   web_mission: 'un texto de misión y valores para la web',
-  volunteer: 'una publicación llamando a voluntarios'
+  volunteer: 'una publicación llamando a voluntarios',
+  photo_video: 'un plan de fotos y videos para la semana'
+};
+const PROMPT_DETAIL = {
+  photo_video: `un PLAN DE FOTOS Y VIDEOS para producir esta semana, usando formato claro con encabezados.
+
+Incluí SIEMPRE:
+1. FOTOS — 5 ideas concretas. Para cada una: qué capturar, encuadre/plano (ej. primer plano, plano general), luz/momento del día, y si conviene retrato o paisaje.
+2. VIDEOS / REELS — 3 ideas. Para cada una: el hook de los primeros 2 segundos, qué grabar (escenas), duración sugerida, y una sugerencia de música o sonido.
+3. CALENDARIO DE LA SEMANA — tabla de Lunes a Domingo indicando qué publicar cada día (foto, reel o story).
+4. 3 TIPS DE PRODUCCIÓN con celular (estabilidad, luz, edición) aplicados a este tipo de lugar.`
 };
 const LANG_NAMES = { pt: 'portugués brasileño', es: 'español argentino', en: 'inglés' };
 
@@ -1319,7 +1330,7 @@ async function generateContent() {
   status.innerHTML = '<div class="loader"><span></span><span></span><span></span></div> Generando…';
   area.innerHTML = '';
   try {
-    const text = await callAI({ system: SYSTEM_MARKETING, prompt: buildPrompt(extra), maxTokens: 1400, temp: 0.8 });
+    const text = await callAI({ system: SYSTEM_MARKETING, prompt: buildPrompt(extra), maxTokens: contentType === 'photo_video' ? 2200 : 1400, temp: 0.8 });
     generatedText = text.trim();
     renderOutput();
     status.textContent = '✓ Listo';
@@ -1347,7 +1358,8 @@ function buildPrompt(extra) {
 - Tono de captions: ${curStyle.captionTone || '—'}
 - A replicar: ${curStyle.notas || '—'}`;
   }
-  return `Generá ${PROMPT_LABELS[contentType]} en ${LANG_NAMES[lang]} para esta organización.
+  const instr = PROMPT_DETAIL[contentType] || PROMPT_LABELS[contentType];
+  return `Generá ${instr} en ${LANG_NAMES[lang]} para esta organización.
 
 DATOS:
 - Nombre: ${p.name || '—'}
