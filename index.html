@@ -228,7 +228,7 @@ input[type=range] { width:100%; accent-color:var(--purple); }
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-mark">✦ Content Studio <span>/ contenido para redes</span></div>
+  <div class="topbar-mark">✦ Content Studio <span>/ contenido para redes</span> <span id="app-ver" style="opacity:.5;font-size:11px">v8</span></div>
   <div class="topbar-status">
     <div class="dot-live" id="ai-dot" style="background:var(--muted);box-shadow:none"></div>
     <span id="ai-label">IA sin configurar</span>
@@ -1214,7 +1214,7 @@ async function analyzeRefs() {
     toast('Estilo analizado');
   } catch (e) {
     status.textContent = '';
-    toast(e.message, true);
+    toast(e.message + ' [motor: ' + settings.backend + ' · modelo: ' + (settings.backend === 'gemini' ? settings.geminiModel : settings.lmModel) + ']', true);
   }
   clearInterval(tick);
   btn.disabled = false;
@@ -1475,7 +1475,8 @@ async function generateContent() {
   } catch (err) {
     status.textContent = '';
     area.innerHTML = `<div class="analysis-box" style="color:var(--red);border-color:rgba(255,95,126,0.3)">
-      <strong>No se pudo generar.</strong><br>${escHtml(err.message)}</div>`;
+      <strong>No se pudo generar.</strong><br>${escHtml(err.message)}
+      <div style="opacity:.6;font-size:12px;margin-top:6px">motor: ${escHtml(settings.backend)} · modelo: ${escHtml(settings.backend === 'gemini' ? settings.geminiModel : settings.lmModel)} · app v8</div></div>`;
   }
   clearInterval(tick);
   btn.disabled = false;
