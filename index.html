@@ -1338,9 +1338,12 @@ async function callGemini({ system, prompt, images, json, maxTokens, temp, _retr
       }
     }
     let hint = t.slice(0, 240);
-    if (r.status === 429) hint = 'Se agotó la cuota gratis por ahora. Esperá unos minutos o probá con otra cuenta/key.';
-    if (r.status === 400 && /API key not valid/i.test(t)) hint = 'La API key no es válida. Creá una nueva en aistudio.google.com/apikey.';
-    if (r.status === 403 && /leaked|reported/i.test(t)) hint = 'Google marcó esta key como filtrada. Creá una nueva en aistudio.google.com/apikey.';
+    if (/does not support image input|not support image|multimodal|image input|doesn't support image/i.test(t)) {
+      hint = 'El modelo "' + settings.geminiModel + '" no lee imágenes. En ⚙ Ajustes → "Cargar modelos disponibles" elegí uno multimodal (los "flash" o "pro" suelen servir) y guardá.';
+    }
+    else if (r.status === 429) hint = 'Se agotó la cuota gratis por ahora. Esperá unos minutos o probá con otra cuenta/key.';
+    else if (r.status === 400 && /API key not valid/i.test(t)) hint = 'La API key no es válida. Creá una nueva en aistudio.google.com/apikey.';
+    else if (r.status === 403 && /leaked|reported/i.test(t)) hint = 'Google marcó esta key como filtrada. Creá una nueva en aistudio.google.com/apikey.';
     throw new Error('Gemini ' + r.status + ': ' + hint);
   }
   const d = await r.json();
@@ -1363,10 +1366,15 @@ async function callLMStudio({ system, prompt, images, json, maxTokens, temp }) {
       body: JSON.stringify({ model: settings.lmModel || 'local-model', messages, max_tokens: maxTokens, temperature: temp, stream: false }),
       signal: AbortSignal.timeout(120000)
     });
-    if (!r.ok) throw new Error('LM Studio respondió ' + r.status);
+    if (!r.ok) {
+      let t = ''; try { t = await r.text(); } catch {}
+      if (/does not support image input|not support image|multimodal|image input/i.test(t)) { const e = new Error('El modelo "' + settings.lmModel + '" no lee imágenes. Cargá un modelo multimodal en LM Studio (ej. Qwen2-VL o LLaVA) y volvé a probar.'); e.friendly = true; throw e; }
+      { const e = new Error('LM Studio respondió ' + r.status + (t ? ': ' + t.slice(0, 180) : '')); e.friendly = true; throw e; }
+    }
     const d = await r.json();
     return (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || '';
   } catch (e) {
+    if (e.friendly) throw e;
     throw new Error('No se pudo conectar con LM Studio. Verificá que esté abierto con un modelo cargado y CORS activo. (' + e.message + ')');
   }
 }
