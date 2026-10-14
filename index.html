@@ -228,11 +228,12 @@ input[type=range] { width:100%; accent-color:var(--purple); }
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-mark">✦ Content Studio <span>/ contenido para redes</span> <span id="app-ver" style="opacity:.5;font-size:11px">v8</span></div>
+  <div class="topbar-mark">✦ Content Studio <span>/ contenido para redes</span> <span id="app-ver" style="opacity:.5;font-size:11px">v9</span></div>
   <div class="topbar-status">
     <div class="dot-live" id="ai-dot" style="background:var(--muted);box-shadow:none"></div>
     <span id="ai-label">IA sin configurar</span>
   </div>
+  <button class="badge" onclick="copyDiagnostics()" style="margin-left:10px">🐞 Diagnóstico</button>
   <button class="badge" onclick="openSettings()" style="margin-left:10px">⚙ Ajustes</button>
   <div class="topbar-place" id="topbar-place" style="display:none"></div>
 </div>
@@ -1281,8 +1282,31 @@ function parseJSON(txt) {
 }
 
 async function callAI({ system, prompt, images = [], json = false, maxTokens = 1200, temp = 0.8 }) {
-  if (settings.backend === 'gemini') return callGemini({ system, prompt, images, json, maxTokens, temp });
-  return callLMStudio({ system, prompt, images, json, maxTokens, temp });
+  try {
+    if (settings.backend === 'gemini') return await callGemini({ system, prompt, images, json, maxTokens, temp });
+    return await callLMStudio({ system, prompt, images, json, maxTokens, temp });
+  } catch (e) {
+    lastError = String((e && e.message) || e);
+    throw e;
+  }
+}
+
+let lastError = '';
+
+async function copyDiagnostics() {
+  let models = '(no se pudo listar)';
+  try { const names = await fetchGeminiModelNames(true); models = names.length ? names.join(', ') : '(vacío)'; } catch {}
+  const txt = [
+    'APP_VERSION: v9',
+    'backend: ' + settings.backend,
+    'geminiModel: ' + settings.geminiModel,
+    'lmModel: ' + settings.lmModel,
+    'geminiKeyPresent: ' + !!settings.geminiKey,
+    'lastError: ' + (lastError || '(ninguno)'),
+    'geminiModels: ' + models
+  ].join('\n');
+  try { await navigator.clipboard.writeText(txt); toast('Diagnóstico copiado al portapapeles'); }
+  catch { window.prompt('Copiá este texto:', txt); }
 }
 
 function pickBestModel(names) {
@@ -1476,7 +1500,7 @@ async function generateContent() {
     status.textContent = '';
     area.innerHTML = `<div class="analysis-box" style="color:var(--red);border-color:rgba(255,95,126,0.3)">
       <strong>No se pudo generar.</strong><br>${escHtml(err.message)}
-      <div style="opacity:.6;font-size:12px;margin-top:6px">motor: ${escHtml(settings.backend)} · modelo: ${escHtml(settings.backend === 'gemini' ? settings.geminiModel : settings.lmModel)} · app v8</div></div>`;
+      <div style="opacity:.6;font-size:12px;margin-top:6px">motor: ${escHtml(settings.backend)} · modelo: ${escHtml(settings.backend === 'gemini' ? settings.geminiModel : settings.lmModel)} · app v9</div></div>`;
   }
   clearInterval(tick);
   btn.disabled = false;
